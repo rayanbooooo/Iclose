@@ -1,6 +1,7 @@
 import { PageHeader } from "@/components/page-header";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { getActiveAccountWithRule } from "@/lib/account";
+import { PageTransition } from "@/components/page-transition";
 import { AccountForm } from "./account-form";
 
 // Reads live account data — must render per-request, not be baked in as a
@@ -16,6 +17,7 @@ export default async function SettingsPage() {
         title="Settings"
         description="Account, payout rules, and strategy configuration"
       />
+      <PageTransition>
       <div className="p-6 md:p-8">
         <Card className="max-w-2xl">
           <CardHeader>
@@ -50,6 +52,7 @@ export default async function SettingsPage() {
           </CardContent>
         </Card>
       </div>
+      </PageTransition>
     </>
   );
 }

@@ -5,7 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { db } from "@/lib/db";
 import { getActiveAccountWithRule } from "@/lib/account";
 import { computeEquityCurve, computePnlByDay, computeStreaks, computeWinRate } from "@/lib/analytics";
-import { formatCurrency } from "@/lib/format";
+import { PageTransition } from "@/components/page-transition";
+import { AnimatedNumber } from "@/components/animated-number";
 import { EquityChart } from "./equity-chart";
 import { PnlByDayChart } from "./pnl-by-day-chart";
 
@@ -20,17 +21,19 @@ export default async function StatsPage() {
     return (
       <>
         <PageHeader title="Stats" description="Win rate, equity curve, P&L by day, streaks" />
-        <div className="p-6 md:p-8">
-          <Card className="max-w-md border-dashed">
-            <CardContent className="pt-6 text-sm text-muted-foreground">
-              Set up your account in{" "}
-              <Link href="/settings" className="text-primary underline">
-                Settings
-              </Link>{" "}
-              first.
-            </CardContent>
-          </Card>
-        </div>
+        <PageTransition>
+          <div className="p-6 md:p-8">
+            <Card className="max-w-md border-dashed">
+              <CardContent className="pt-6 text-sm text-muted-foreground">
+                Set up your account in{" "}
+                <Link href="/settings" className="text-primary underline">
+                  Settings
+                </Link>{" "}
+                first.
+              </CardContent>
+            </Card>
+          </div>
+        </PageTransition>
       </>
     );
   }
@@ -47,18 +50,20 @@ export default async function StatsPage() {
     return (
       <>
         <PageHeader title="Stats" description="Win rate, equity curve, P&L by day, streaks" />
-        <div className="p-6 md:p-8">
-          <Card className="border-dashed">
-            <CardContent className="pt-6 text-sm text-muted-foreground">
-              No closed trades yet. Analytics show up here once you&rsquo;ve logged and closed
-              some trades in the{" "}
-              <Link href="/journal" className="text-primary underline">
-                Journal
-              </Link>
-              .
-            </CardContent>
-          </Card>
-        </div>
+        <PageTransition>
+          <div className="p-6 md:p-8">
+            <Card className="border-dashed">
+              <CardContent className="pt-6 text-sm text-muted-foreground">
+                No closed trades yet. Analytics show up here once you&rsquo;ve logged and closed
+                some trades in the{" "}
+                <Link href="/journal" className="text-primary underline">
+                  Journal
+                </Link>
+                .
+              </CardContent>
+            </Card>
+          </div>
+        </PageTransition>
       </>
     );
   }
@@ -66,13 +71,14 @@ export default async function StatsPage() {
   return (
     <>
       <PageHeader title="Stats" description="Win rate, equity curve, P&L by day, streaks" />
+      <PageTransition>
       <div className="space-y-4 p-6 md:p-8">
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <Card>
             <CardHeader className="pb-2">
               <CardDescription>Net P&L</CardDescription>
               <CardTitle className={netPnl >= 0 ? "text-success" : "text-destructive"}>
-                {formatCurrency(netPnl)}
+                <AnimatedNumber value={netPnl} prefix="$" decimals={2} signed />
               </CardTitle>
             </CardHeader>
           </Card>
@@ -80,7 +86,7 @@ export default async function StatsPage() {
             <CardHeader className="pb-2">
               <CardDescription>Win rate</CardDescription>
               <CardTitle>
-                {winRate.pct.toFixed(1)}%{" "}
+                <AnimatedNumber value={winRate.pct} decimals={1} suffix="%" />{" "}
                 <span className="text-sm font-normal text-muted-foreground">
                   ({winRate.wins}W / {winRate.losses}L)
                 </span>
@@ -91,7 +97,8 @@ export default async function StatsPage() {
             <CardHeader className="pb-2">
               <CardDescription>Current streak</CardDescription>
               <CardTitle className={streaks.currentType === "WIN" ? "text-success" : "text-destructive"}>
-                {streaks.current} {streaks.currentType === "WIN" ? "wins" : streaks.currentType === "LOSS" ? "losses" : ""}
+                <AnimatedNumber value={streaks.current} />{" "}
+                {streaks.currentType === "WIN" ? "wins" : streaks.currentType === "LOSS" ? "losses" : ""}
               </CardTitle>
             </CardHeader>
           </Card>
@@ -99,9 +106,13 @@ export default async function StatsPage() {
             <CardHeader className="pb-2">
               <CardDescription>Best / worst streak</CardDescription>
               <CardTitle className="text-base">
-                <span className="text-success">{streaks.longestWin}W</span>
+                <span className="text-success">
+                  <AnimatedNumber value={streaks.longestWin} />W
+                </span>
                 {" · "}
-                <span className="text-destructive">{streaks.longestLoss}L</span>
+                <span className="text-destructive">
+                  <AnimatedNumber value={streaks.longestLoss} />L
+                </span>
               </CardTitle>
             </CardHeader>
           </Card>
@@ -128,6 +139,7 @@ export default async function StatsPage() {
           </Card>
         </div>
       </div>
+      </PageTransition>
     </>
   );
 }

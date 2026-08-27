@@ -111,3 +111,51 @@ body {
 * {
   border-color: var(--color-border, currentColor);
 }
+
+/* Moving background: slow-drifting blurred aurora blobs behind the app shell. */
+@keyframes drift-a {
+  0%, 100% { transform: translate(-5%, -8%) scale(1); }
+  33% { transform: translate(8%, 5%) scale(1.15); }
+  66% { transform: translate(-2%, 10%) scale(0.95); }
+}
+
+@keyframes drift-b {
+  0%, 100% { transform: translate(6%, 8%) scale(1); }
+  33% { transform: translate(-8%, -4%) scale(0.9); }
+  66% { transform: translate(4%, -10%) scale(1.1); }
+}
+
+@keyframes drift-c {
+  0%, 100% { transform: translate(0%, 0%) scale(1); }
+  50% { transform: translate(-6%, 6%) scale(1.2); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 0.85; }
+}
+
+.bg-blob-a {
+  animation: drift-a 34s ease-in-out infinite, pulse-glow 9s ease-in-out infinite;
+}
+.bg-blob-b {
+  animation: drift-b 40s ease-in-out infinite, pulse-glow 11s ease-in-out infinite;
+  animation-delay: -6s;
+}
+.bg-blob-c {
+  animation: drift-c 46s ease-in-out infinite, pulse-glow 13s ease-in-out infinite;
+  animation-delay: -3s;
+}
+
+.bg-grid-pattern {
+  background-image:
+    linear-gradient(to right, var(--color-border) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--color-border) 1px, transparent 1px);
+  background-size: 44px 44px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bg-blob-a, .bg-blob-b, .bg-blob-c {
+    animation: none;
+  }
+}

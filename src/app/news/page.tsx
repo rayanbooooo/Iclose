@@ -5,6 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { getEconomicCalendar, getMarketNews, getMarketSnapshot } from "@/lib/market-data/read";
 import { formatEventTime, formatRelativeTime, formatSignedPercent } from "@/lib/format";
+import { PageTransition } from "@/components/page-transition";
+import { AnimatedNumber } from "@/components/animated-number";
 import type { EconomicEventSchema } from "@/lib/market-data/schema";
 import type { z } from "zod";
 
@@ -44,6 +46,7 @@ export default async function NewsPage() {
         title="News & Market"
         description="Synced periodically from TipRanks — not live. See last-synced times below."
       />
+      <PageTransition>
       <div className="grid gap-4 p-6 md:p-8 lg:grid-cols-3">
         <Card className="lg:col-span-3">
           <CardHeader>
@@ -65,7 +68,7 @@ export default async function NewsPage() {
                 <div key={idx.symbol}>
                   <p className="text-xs text-muted-foreground">{idx.name}</p>
                   <p className="text-lg font-semibold tabular-nums">
-                    {idx.price.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                    <AnimatedNumber value={idx.price} decimals={2} />
                   </p>
                   <p
                     className={
@@ -185,6 +188,7 @@ export default async function NewsPage() {
           </CardContent>
         </Card>
       </div>
+      </PageTransition>
     </>
   );
 }

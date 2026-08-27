@@ -3,6 +3,8 @@ import { CandlestickChart, ShieldCheck, NotebookText, BarChart3 } from "lucide-r
 
 import { PageHeader } from "@/components/page-header";
 import { EmptyState } from "@/components/empty-state";
+import { PageTransition } from "@/components/page-transition";
+import { AnimatedNumber } from "@/components/animated-number";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -33,17 +35,19 @@ export default async function DashboardPage() {
           title="Dashboard"
           description="MNQ 15m swing-high/low strategy · Topstep payout tracker"
         />
-        <div className="p-6 md:p-8">
-          <Card className="max-w-md border-dashed">
-            <CardContent className="pt-6 text-sm text-muted-foreground">
-              Set up your account in{" "}
-              <Link href="/settings" className="text-primary underline">
-                Settings
-              </Link>{" "}
-              to see your payout readiness, trades, and performance here.
-            </CardContent>
-          </Card>
-        </div>
+        <PageTransition>
+          <div className="p-6 md:p-8">
+            <Card className="max-w-md border-dashed">
+              <CardContent className="pt-6 text-sm text-muted-foreground">
+                Set up your account in{" "}
+                <Link href="/settings" className="text-primary underline">
+                  Settings
+                </Link>{" "}
+                to see your payout readiness, trades, and performance here.
+              </CardContent>
+            </Card>
+          </div>
+        </PageTransition>
       </>
     );
   }
@@ -70,9 +74,10 @@ export default async function DashboardPage() {
         title="Dashboard"
         description="MNQ 15m swing-high/low strategy · Topstep payout tracker"
       />
+      <PageTransition>
       <div className="grid gap-4 p-6 md:p-8 lg:grid-cols-2">
         <EmptyState
-          icon={CandlestickChart}
+          icon={<CandlestickChart className="size-4.5" />}
           title="Chart"
           description="Live MNQ 15m candles with swing-hi/lo lines and signal markers."
           phase="Next up: strategy engine + live chart."
@@ -96,14 +101,16 @@ export default async function DashboardPage() {
             <div className="flex items-baseline justify-between">
               <span className="text-xs text-muted-foreground">Balance</span>
               <span className="text-sm font-semibold tabular-nums">
-                {formatMoney(readiness.balance)}
+                <AnimatedNumber value={readiness.balance} prefix="$" decimals={2} />
               </span>
             </div>
             <div>
               <div className="mb-1 flex items-baseline justify-between text-xs">
                 <span className="text-muted-foreground">Profit target</span>
                 <span className="tabular-nums">
-                  {formatCurrency(readiness.profitTarget.profit)} / {formatMoney(readiness.profitTarget.target)}
+                  <AnimatedNumber value={readiness.profitTarget.profit} prefix="$" decimals={2} signed />
+                  {" / "}
+                  {formatMoney(readiness.profitTarget.target)}
                 </span>
               </div>
               <Progress value={readiness.profitTarget.pct} />
@@ -111,7 +118,9 @@ export default async function DashboardPage() {
             <div>
               <div className="mb-1 flex items-baseline justify-between text-xs">
                 <span className="text-muted-foreground">Drawdown cushion remaining</span>
-                <span className="tabular-nums">{formatMoney(readiness.drawdown.remaining)}</span>
+                <span className="tabular-nums">
+                  <AnimatedNumber value={readiness.drawdown.remaining} prefix="$" decimals={2} />
+                </span>
               </div>
               <Progress
                 value={100 - drawdownUsedPct}
@@ -193,22 +202,27 @@ export default async function DashboardPage() {
                 <div>
                   <p className="text-xs text-muted-foreground">Net P&L</p>
                   <p className={"text-lg font-semibold " + (netPnl >= 0 ? "text-success" : "text-destructive")}>
-                    {formatCurrency(netPnl)}
+                    <AnimatedNumber value={netPnl} prefix="$" decimals={2} signed />
                   </p>
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground">Win rate</p>
-                  <p className="text-lg font-semibold">{winRate.pct.toFixed(0)}%</p>
+                  <p className="text-lg font-semibold">
+                    <AnimatedNumber value={winRate.pct} decimals={0} suffix="%" />
+                  </p>
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground">Trades</p>
-                  <p className="text-lg font-semibold">{winRate.total}</p>
+                  <p className="text-lg font-semibold">
+                    <AnimatedNumber value={winRate.total} />
+                  </p>
                 </div>
               </div>
             )}
           </CardContent>
         </Card>
       </div>
+      </PageTransition>
     </>
   );
 }

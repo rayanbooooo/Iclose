@@ -14,6 +14,7 @@ import {
 import { db } from "@/lib/db";
 import { getActiveAccountWithRule } from "@/lib/account";
 import { formatCurrency, toDatetimeLocalValue } from "@/lib/format";
+import { PageTransition } from "@/components/page-transition";
 import { TradeDialog } from "./trade-dialog";
 import { DeleteTradeButton } from "./delete-trade-button";
 
@@ -28,17 +29,19 @@ export default async function JournalPage() {
     return (
       <>
         <PageHeader title="Journal" description="Logged trades and P&L" />
-        <div className="p-6 md:p-8">
-          <Card className="max-w-md border-dashed">
-            <CardContent className="pt-6 text-sm text-muted-foreground">
-              Set up your account in{" "}
-              <Link href="/settings" className="text-primary underline">
-                Settings
-              </Link>{" "}
-              before logging trades.
-            </CardContent>
-          </Card>
-        </div>
+        <PageTransition>
+          <div className="p-6 md:p-8">
+            <Card className="max-w-md border-dashed">
+              <CardContent className="pt-6 text-sm text-muted-foreground">
+                Set up your account in{" "}
+                <Link href="/settings" className="text-primary underline">
+                  Settings
+                </Link>{" "}
+                before logging trades.
+              </CardContent>
+            </Card>
+          </div>
+        </PageTransition>
       </>
     );
   }
@@ -51,6 +54,7 @@ export default async function JournalPage() {
   return (
     <>
       <PageHeader title="Journal" description="Logged trades and P&L" />
+      <PageTransition>
       <div className="space-y-4 p-6 md:p-8">
         <div className="flex items-center justify-between">
           <p className="text-sm text-muted-foreground">
@@ -160,6 +164,7 @@ export default async function JournalPage() {
           </Card>
         )}
       </div>
+      </PageTransition>
     </>
   );
 }

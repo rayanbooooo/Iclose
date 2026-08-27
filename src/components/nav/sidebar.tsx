@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { motion } from "motion/react";
 import {
   LayoutDashboard,
   CandlestickChart,
@@ -28,7 +29,11 @@ export function Sidebar() {
   return (
     <aside className="hidden md:flex w-56 shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground">
       <div className="px-5 py-5">
-        <span className="text-sm font-semibold tracking-wide text-sidebar-foreground">
+        <span className="flex items-center gap-2 text-sm font-semibold tracking-wide text-sidebar-foreground">
+          <span className="relative inline-flex size-1.5 shrink-0">
+            <span className="absolute inline-flex size-full animate-ping rounded-full bg-sidebar-primary/60" />
+            <span className="relative inline-flex size-1.5 rounded-full bg-sidebar-primary" />
+          </span>
           MNQ<span className="text-sidebar-primary">.</span>Dashboard
         </span>
       </div>
@@ -42,14 +47,21 @@ export function Sidebar() {
               key={item.href}
               href={item.href}
               className={cn(
-                "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                "relative flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
                 active
-                  ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                  ? "text-sidebar-accent-foreground"
                   : "text-sidebar-foreground/70 hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground",
               )}
             >
-              <Icon className="size-4" />
-              {item.label}
+              {active && (
+                <motion.div
+                  layoutId="sidebar-active"
+                  className="absolute inset-0 rounded-md bg-sidebar-accent"
+                  transition={{ type: "spring", stiffness: 400, damping: 32 }}
+                />
+              )}
+              <Icon className="relative size-4" />
+              <span className="relative">{item.label}</span>
             </Link>
           );
         })}
