@@ -1,34 +1,53 @@
+import { Fragment } from "react";
 import { ExternalLink } from "lucide-react";
 
 import { PageHeader } from "@/components/page-header";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { cn } from "@/lib/utils";
 import { getEconomicCalendar, getMarketNews, getMarketSnapshot } from "@/lib/market-data/read";
-import { formatEventTime, formatRelativeTime, formatSignedPercent } from "@/lib/format";
+import { formatRelativeTime, formatSignedPercent } from "@/lib/format";
 import { PageTransition } from "@/components/page-transition";
 import { AnimatedNumber } from "@/components/animated-number";
 import type { EconomicEventSchema } from "@/lib/market-data/schema";
 import type { z } from "zod";
 
-function impactVariant(impact: string) {
-  if (impact === "High") return "destructive" as const;
-  if (impact === "Medium") return "secondary" as const;
-  return "outline" as const;
+const IMPACT_DOT: Record<string, string> = {
+  High: "bg-destructive",
+  Medium: "bg-chart-5",
+  Low: "bg-muted-foreground",
+};
+
+function todayEtKey(now = new Date()) {
+  return now.toLocaleDateString("en-US", { timeZone: "America/New_York" });
 }
 
 function groupByDay(events: z.infer<typeof EconomicEventSchema>[]) {
-  const groups = new Map<string, typeof events>();
+  const groups = new Map<
+    string,
+    { label: string; dateKey: string; events: typeof events }
+  >();
   for (const event of events) {
-    const key = new Date(event.time).toLocaleDateString("en-US", {
+    const date = new Date(event.time);
+    const dateKey = date.toLocaleDateString("en-US", { timeZone: "America/New_York" });
+    const label = date.toLocaleDateString("en-US", {
       timeZone: "America/New_York",
       weekday: "long",
       month: "short",
       day: "numeric",
     });
-    if (!groups.has(key)) groups.set(key, []);
-    groups.get(key)!.push(event);
+    if (!groups.has(dateKey)) groups.set(dateKey, { label, dateKey, events: [] });
+    groups.get(dateKey)!.events.push(event);
   }
-  return groups;
+  return [...groups.values()];
 }
 
 export default async function NewsPage() {
@@ -39,6 +58,7 @@ export default async function NewsPage() {
   ]);
 
   const eventGroups = groupByDay(calendar.events);
+  const today = todayEtKey();
 
   return (
     <>
@@ -47,8 +67,8 @@ export default async function NewsPage() {
         description="Synced periodically from TipRanks — not live. See last-synced times below."
       />
       <PageTransition>
-      <div className="grid gap-4 p-6 md:p-8 lg:grid-cols-3">
-        <Card className="lg:col-span-3">
+      <div className="space-y-4 p-6 md:p-8">
+        <Card>
           <CardHeader>
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div>
@@ -111,47 +131,98 @@ export default async function NewsPage() {
           </CardContent>
         </Card>
 
-        <Card className="lg:col-span-1">
+        <Card>
           <CardHeader>
             <CardTitle>Economic calendar</CardTitle>
             <CardDescription>
               US · High/Medium impact · synced {formatRelativeTime(calendar.syncedAt)}
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-5">
-              {[...eventGroups.entries()].map(([day, events]) => (
-                <div key={day}>
-                  <p className="mb-2 text-xs font-medium text-muted-foreground">{day}</p>
-                  <ul className="space-y-2.5">
-                    {events.map((event, i) => (
-                      <li key={`${event.event}-${event.time}-${i}`} className="text-xs">
-                        <div className="flex items-center justify-between gap-2">
-                          <span className="font-medium">{event.event}</span>
-                          <Badge variant={impactVariant(event.impact)} className="shrink-0">
-                            {event.impact}
-                          </Badge>
-                        </div>
-                        <div className="mt-0.5 text-muted-foreground">
-                          {formatEventTime(event.time)}
-                          {event.actual !== null && (
-                            <>
-                              {" "}
-                              · actual <span className="text-foreground">{event.actual}{event.unit ?? ""}</span>
-                              {event.estimate !== null && <> (est {event.estimate}{event.unit ?? ""})</>}
-                            </>
-                          )}
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
+          <CardContent className="px-0">
+            <div className="mb-3 flex items-center gap-4 px-6 text-xs text-muted-foreground">
+              <span className="flex items-center gap-1.5">
+                <span className="size-2 rounded-full bg-destructive" /> High
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="size-2 rounded-full bg-chart-5" /> Medium
+              </span>
             </div>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-24">Time</TableHead>
+                  <TableHead className="w-10"></TableHead>
+                  <TableHead>Event</TableHead>
+                  <TableHead className="text-right">Actual</TableHead>
+                  <TableHead className="text-right">Forecast</TableHead>
+                  <TableHead className="text-right">Previous</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {eventGroups.map((group) => (
+                  <Fragment key={group.dateKey}>
+                    <TableRow className="hover:bg-transparent">
+                      <TableCell
+                        colSpan={6}
+                        className={cn(
+                          "bg-muted/40 py-1.5 text-xs font-semibold tracking-wide text-foreground/80",
+                          group.dateKey === today && "text-primary",
+                        )}
+                      >
+                        {group.label}
+                        {group.dateKey === today && (
+                          <Badge variant="outline" className="ml-2 border-primary/40 text-primary">
+                            Today
+                          </Badge>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                    {group.events.map((event, i) => (
+                      <TableRow key={`${group.dateKey}-${event.event}-${i}`}>
+                        <TableCell className="whitespace-nowrap text-xs text-muted-foreground">
+                          {new Date(event.time).toLocaleTimeString("en-US", {
+                            timeZone: "America/New_York",
+                            hour: "numeric",
+                            minute: "2-digit",
+                          })}{" "}
+                          ET
+                        </TableCell>
+                        <TableCell>
+                          <span
+                            title={event.impact}
+                            className={cn(
+                              "inline-block size-2 rounded-full",
+                              IMPACT_DOT[event.impact] ?? "bg-muted-foreground",
+                            )}
+                          />
+                        </TableCell>
+                        <TableCell className="text-sm font-medium">{event.event}</TableCell>
+                        <TableCell className="text-right text-sm tabular-nums">
+                          {event.actual !== null ? (
+                            <span className="font-medium">
+                              {event.actual}
+                              {event.unit ?? ""}
+                            </span>
+                          ) : (
+                            <span className="text-muted-foreground">—</span>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-right text-sm tabular-nums text-muted-foreground">
+                          {event.estimate !== null ? `${event.estimate}${event.unit ?? ""}` : "—"}
+                        </TableCell>
+                        <TableCell className="text-right text-sm tabular-nums text-muted-foreground">
+                          {event.prev !== null ? `${event.prev}${event.unit ?? ""}` : "—"}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </Fragment>
+                ))}
+              </TableBody>
+            </Table>
           </CardContent>
         </Card>
 
-        <Card className="lg:col-span-2">
+        <Card>
           <CardHeader>
             <CardTitle>Headlines</CardTitle>
             <CardDescription>

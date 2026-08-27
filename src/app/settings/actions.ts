@@ -50,3 +50,16 @@ export async function upsertAccount(values: AccountFormValues) {
   revalidatePath("/journal");
   revalidatePath("/stats");
 }
+
+/**
+ * Deletes all trades for the account. Leaves the account and payout-rule
+ * config untouched — this is a journal reset, not an account reset.
+ */
+export async function resetTrades(accountId: string) {
+  await db.trade.deleteMany({ where: { accountId } });
+
+  revalidatePath("/settings");
+  revalidatePath("/");
+  revalidatePath("/journal");
+  revalidatePath("/stats");
+}

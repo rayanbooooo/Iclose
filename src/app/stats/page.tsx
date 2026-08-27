@@ -9,6 +9,7 @@ import { PageTransition } from "@/components/page-transition";
 import { AnimatedNumber } from "@/components/animated-number";
 import { EquityChart } from "./equity-chart";
 import { PnlByDayChart } from "./pnl-by-day-chart";
+import { TradingCalendar } from "./trading-calendar";
 
 // Reads live trade data — must render per-request, not be baked in as a
 // static page at build time.
@@ -117,6 +118,16 @@ export default async function StatsPage() {
             </CardHeader>
           </Card>
         </div>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Calendar</CardTitle>
+            <CardDescription>Daily P&amp;L by month, weekly rollups in the Saturday column</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <TradingCalendar dailyPnl={pnlByDay} />
+          </CardContent>
+        </Card>
 
         <div className="grid gap-4 lg:grid-cols-2">
           <Card>

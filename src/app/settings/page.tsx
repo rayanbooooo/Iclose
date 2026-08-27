@@ -1,8 +1,10 @@
 import { PageHeader } from "@/components/page-header";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { getActiveAccountWithRule } from "@/lib/account";
+import { db } from "@/lib/db";
 import { PageTransition } from "@/components/page-transition";
 import { AccountForm } from "./account-form";
+import { ResetTradesButton } from "./reset-trades-button";
 
 // Reads live account data — must render per-request, not be baked in as a
 // static page at build time.
@@ -10,6 +12,9 @@ export const dynamic = "force-dynamic";
 
 export default async function SettingsPage() {
   const account = await getActiveAccountWithRule();
+  const tradeCount = account
+    ? await db.trade.count({ where: { accountId: account.id } })
+    : 0;
 
   return (
     <>
@@ -51,6 +56,21 @@ export default async function SettingsPage() {
             />
           </CardContent>
         </Card>
+
+        {account && (
+          <Card className="mt-4 max-w-2xl border-destructive/30">
+            <CardHeader>
+              <CardTitle className="text-destructive">Danger zone</CardTitle>
+              <CardDescription>
+                Permanently deletes your logged trades. Account and payout-rule settings
+                are not affected.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ResetTradesButton accountId={account.id} tradeCount={tradeCount} />
+            </CardContent>
+          </Card>
+        )}
       </div>
       </PageTransition>
     </>
