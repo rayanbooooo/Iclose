@@ -42,6 +42,33 @@ export function computePnlByDay(trades: AnalyticsTrade[]) {
     .sort((a, b) => a.day.localeCompare(b.day));
 }
 
+export interface TradeStatsTrade extends AnalyticsTrade {
+  pnl: number | null;
+}
+
+export function computeTradeStats(trades: TradeStatsTrade[]) {
+  const closed = closedSortedByExit(trades);
+  const wins = closed.filter((t) => t.pnl > 0);
+  const losses = closed.filter((t) => t.pnl <= 0);
+
+  const grossWin = wins.reduce((sum, t) => sum + t.pnl, 0);
+  const grossLoss = losses.reduce((sum, t) => sum + t.pnl, 0);
+
+  const avgWin = wins.length > 0 ? grossWin / wins.length : 0;
+  const avgLoss = losses.length > 0 ? grossLoss / losses.length : 0;
+  const profitFactor = grossLoss < 0 ? grossWin / Math.abs(grossLoss) : grossWin > 0 ? Infinity : 0;
+
+  const bestTrade = closed.length > 0 ? closed.reduce((a, b) => (b.pnl > a.pnl ? b : a)) : null;
+  const worstTrade = closed.length > 0 ? closed.reduce((a, b) => (b.pnl < a.pnl ? b : a)) : null;
+
+  const avgHoldMinutes =
+    closed.length > 0
+      ? closed.reduce((sum, t) => sum + (t.exitTime.getTime() - t.entryTime.getTime()) / 60000, 0) / closed.length
+      : 0;
+
+  return { avgWin, avgLoss, profitFactor, bestTrade, worstTrade, avgHoldMinutes };
+}
+
 export function computeStreaks(trades: AnalyticsTrade[]) {
   const closed = closedSortedByExit(trades);
 

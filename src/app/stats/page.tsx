@@ -4,9 +4,12 @@ import { PageHeader } from "@/components/page-header";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { db } from "@/lib/db";
 import { getActiveAccountWithRule } from "@/lib/account";
-import { computeEquityCurve, computePnlByDay, computeStreaks, computeWinRate } from "@/lib/analytics";
+import { computeEquityCurve, computePnlByDay, computeStreaks, computeTradeStats, computeWinRate } from "@/lib/analytics";
+import { computeDirectionBreakdown } from "@/lib/analytics/patterns";
 import { PageTransition } from "@/components/page-transition";
 import { AnimatedNumber } from "@/components/animated-number";
+import { Badge } from "@/components/ui/badge";
+import { formatCurrency, formatMoney } from "@/lib/format";
 import { EquityChart } from "./equity-chart";
 import { PnlByDayChart } from "./pnl-by-day-chart";
 import { TradingCalendar } from "./trading-calendar";
@@ -45,6 +48,8 @@ export default async function StatsPage() {
   const streaks = computeStreaks(trades);
   const equityCurve = computeEquityCurve(trades, account.startingBalance);
   const pnlByDay = computePnlByDay(trades);
+  const tradeStats = computeTradeStats(trades);
+  const directionStats = computeDirectionBreakdown(trades);
   const netPnl = equityCurve.length > 0 ? equityCurve[equityCurve.length - 1].balance - account.startingBalance : 0;
 
   if (winRate.total === 0) {
@@ -118,6 +123,73 @@ export default async function StatsPage() {
             </CardHeader>
           </Card>
         </div>
+
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardDescription>Profit factor</CardDescription>
+              <CardTitle>
+                {tradeStats.profitFactor === Infinity ? "∞" : tradeStats.profitFactor.toFixed(2)}
+              </CardTitle>
+            </CardHeader>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardDescription>Avg win / avg loss</CardDescription>
+              <CardTitle className="text-base">
+                <span className="text-success">{formatMoney(tradeStats.avgWin)}</span>
+                {" / "}
+                <span className="text-destructive">{formatMoney(Math.abs(tradeStats.avgLoss))}</span>
+              </CardTitle>
+            </CardHeader>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardDescription>Best / worst trade</CardDescription>
+              <CardTitle className="text-base">
+                <span className="text-success">
+                  {tradeStats.bestTrade ? formatCurrency(tradeStats.bestTrade.pnl) : "—"}
+                </span>
+                {" / "}
+                <span className="text-destructive">
+                  {tradeStats.worstTrade ? formatCurrency(tradeStats.worstTrade.pnl) : "—"}
+                </span>
+              </CardTitle>
+            </CardHeader>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardDescription>Avg hold time</CardDescription>
+              <CardTitle>
+                {tradeStats.avgHoldMinutes >= 60
+                  ? `${(tradeStats.avgHoldMinutes / 60).toFixed(1)}h`
+                  : `${tradeStats.avgHoldMinutes.toFixed(0)}m`}
+              </CardTitle>
+            </CardHeader>
+          </Card>
+        </div>
+
+        {directionStats.length > 1 && (
+          <Card>
+            <CardHeader>
+              <CardTitle>By direction</CardTitle>
+              <CardDescription>Long vs. short performance</CardDescription>
+            </CardHeader>
+            <CardContent className="flex flex-wrap gap-6">
+              {directionStats.map((d) => (
+                <div key={d.direction} className="flex items-center gap-3">
+                  <Badge variant={d.direction === "LONG" ? "success" : "destructive"}>{d.direction}</Badge>
+                  <span className="text-sm text-muted-foreground">
+                    {d.trades} trades · {d.winRate.toFixed(0)}% win ·{" "}
+                    <span className={d.netPnl >= 0 ? "text-success" : "text-destructive"}>
+                      {formatCurrency(d.netPnl)}
+                    </span>
+                  </span>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        )}
 
         <Card>
           <CardHeader>

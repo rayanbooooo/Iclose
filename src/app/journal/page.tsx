@@ -13,7 +13,9 @@ import {
 } from "@/components/ui/table";
 import { db } from "@/lib/db";
 import { getActiveAccountWithRule } from "@/lib/account";
+import { computeWinRate } from "@/lib/analytics";
 import { formatCurrency, toDatetimeLocalValue } from "@/lib/format";
+import { cn } from "@/lib/utils";
 import { PageTransition } from "@/components/page-transition";
 import { TradeDialog } from "./trade-dialog";
 import { DeleteTradeButton } from "./delete-trade-button";
@@ -22,7 +24,41 @@ import { DeleteTradeButton } from "./delete-trade-button";
 // static page at build time.
 export const dynamic = "force-dynamic";
 
-export default async function JournalPage() {
+type StatusFilter = "ALL" | "OPEN" | "CLOSED";
+type DirectionFilter = "ALL" | "LONG" | "SHORT";
+
+function FilterLink({
+  active,
+  href,
+  children,
+}: {
+  active: boolean;
+  href: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <Link
+      href={href}
+      className={cn(
+        "rounded-md px-2.5 py-1 text-xs font-medium transition-colors",
+        active ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-secondary",
+      )}
+    >
+      {children}
+    </Link>
+  );
+}
+
+export default async function JournalPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ status?: string; direction?: string }>;
+}) {
+  const params = await searchParams;
+  const status: StatusFilter = params.status === "OPEN" || params.status === "CLOSED" ? params.status : "ALL";
+  const direction: DirectionFilter =
+    params.direction === "LONG" || params.direction === "SHORT" ? params.direction : "ALL";
+
   const account = await getActiveAccountWithRule();
 
   if (!account) {
@@ -46,27 +82,89 @@ export default async function JournalPage() {
     );
   }
 
-  const trades = await db.trade.findMany({
+  const allTrades = await db.trade.findMany({
     where: { accountId: account.id },
     orderBy: { entryTime: "desc" },
   });
+
+  const trades = allTrades.filter(
+    (t) => (status === "ALL" || t.status === status) && (direction === "ALL" || t.direction === direction),
+  );
+
+  const winRate = computeWinRate(trades);
+  const netPnl = trades.reduce((sum, t) => sum + (t.pnl ?? 0), 0);
+
+  const buildHref = (next: Partial<{ status: StatusFilter; direction: DirectionFilter }>) => {
+    const s = next.status ?? status;
+    const d = next.direction ?? direction;
+    const qs = new URLSearchParams();
+    if (s !== "ALL") qs.set("status", s);
+    if (d !== "ALL") qs.set("direction", d);
+    const query = qs.toString();
+    return query ? `/journal?${query}` : "/journal";
+  };
 
   return (
     <>
       <PageHeader title="Journal" description="Logged trades and P&L" />
       <PageTransition>
       <div className="space-y-4 p-6 md:p-8">
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-muted-foreground">
-            {trades.length} trade{trades.length === 1 ? "" : "s"}
-          </p>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-1 rounded-md border border-border/60 p-0.5">
+              {(["ALL", "OPEN", "CLOSED"] as const).map((s) => (
+                <FilterLink key={s} active={status === s} href={buildHref({ status: s })}>
+                  {s === "ALL" ? "All" : s === "OPEN" ? "Open" : "Closed"}
+                </FilterLink>
+              ))}
+            </div>
+            <div className="flex items-center gap-1 rounded-md border border-border/60 p-0.5">
+              {(["ALL", "LONG", "SHORT"] as const).map((d) => (
+                <FilterLink key={d} active={direction === d} href={buildHref({ direction: d })}>
+                  {d === "ALL" ? "All" : d === "LONG" ? "Long" : "Short"}
+                </FilterLink>
+              ))}
+            </div>
+          </div>
           <TradeDialog accountId={account.id} />
         </div>
 
-        {trades.length === 0 ? (
+        {allTrades.length > 0 && (
+          <div className="flex flex-wrap items-center gap-6 rounded-lg border border-border/60 bg-card/40 px-4 py-3 text-sm">
+            <span>
+              <span className="text-muted-foreground">Showing </span>
+              <span className="font-medium">{trades.length}</span>
+              <span className="text-muted-foreground"> of {allTrades.length}</span>
+            </span>
+            <span>
+              <span className="text-muted-foreground">Win rate </span>
+              <span className="font-medium">
+                {winRate.total > 0 ? `${winRate.pct.toFixed(0)}%` : "—"}
+              </span>
+            </span>
+            <span>
+              <span className="text-muted-foreground">Net P&amp;L </span>
+              <span className={cn("font-medium", netPnl >= 0 ? "text-success" : "text-destructive")}>
+                {formatCurrency(netPnl)}
+              </span>
+            </span>
+          </div>
+        )}
+
+        {allTrades.length === 0 ? (
           <Card className="border-dashed">
             <CardContent className="pt-6 text-sm text-muted-foreground">
               No trades logged yet. Click &ldquo;Add trade&rdquo; to log your first one.
+            </CardContent>
+          </Card>
+        ) : trades.length === 0 ? (
+          <Card className="border-dashed">
+            <CardContent className="pt-6 text-sm text-muted-foreground">
+              No trades match this filter.{" "}
+              <Link href="/journal" className="text-primary underline">
+                Clear filters
+              </Link>
+              .
             </CardContent>
           </Card>
         ) : (
