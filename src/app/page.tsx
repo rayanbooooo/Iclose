@@ -1,9 +1,19 @@
 import Link from "next/link";
-import { CandlestickChart, ShieldCheck, NotebookText, BarChart3, TrendingUp, TrendingDown } from "lucide-react";
+import {
+  CandlestickChart,
+  ShieldCheck,
+  NotebookText,
+  BarChart3,
+  TrendingUp,
+  TrendingDown,
+  PlayCircle,
+  CalendarClock,
+} from "lucide-react";
 
 import { PageHeader } from "@/components/page-header";
 import { PageTransition } from "@/components/page-transition";
 import { AnimatedNumber } from "@/components/animated-number";
+import { EquitySparkline } from "@/components/equity-sparkline";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -14,6 +24,7 @@ import { computeWinRate, computeEquityCurve } from "@/lib/analytics";
 import { formatCurrency, formatEventTime, formatMoney } from "@/lib/format";
 import { generateSampleCandles } from "@/lib/data-providers/sample-provider";
 import { DEFAULT_STRATEGY_CONFIG, runStrategy } from "@/lib/strategy-engine/engine";
+import { getEconomicCalendar } from "@/lib/market-data/read";
 
 // Reads live account/trade data — must render per-request, not be baked in
 // as a static page at build time.
@@ -58,6 +69,18 @@ export default async function DashboardPage() {
     orderBy: { entryTime: "desc" },
   });
 
+  const [activeSession, calendar] = await Promise.all([
+    db.tradingSession.findFirst({ where: { accountId: account.id, endedAt: null } }),
+    getEconomicCalendar(),
+  ]);
+
+  const todayEt = new Date().toLocaleDateString("en-US", { timeZone: "America/New_York" });
+  const highImpactToday = calendar.events.filter(
+    (e) =>
+      e.impact === "High" &&
+      new Date(e.time).toLocaleDateString("en-US", { timeZone: "America/New_York" }) === todayEt,
+  );
+
   const readiness = getPayoutReadiness(account, account.payoutRule, trades);
   const sampleCandles = generateSampleCandles();
   const { signals } = runStrategy(sampleCandles, DEFAULT_STRATEGY_CONFIG);
@@ -79,7 +102,44 @@ export default async function DashboardPage() {
         description="MNQ 15m swing-high/low strategy · Topstep payout tracker"
       />
       <PageTransition>
-      <div className="grid gap-4 p-6 md:p-8 lg:grid-cols-2">
+      <div className="space-y-4 p-6 md:p-8">
+        {activeSession && (
+          <Link href="/session">
+            <Card className="border-primary/40 bg-primary/5 transition-colors hover:bg-primary/10">
+              <CardContent className="flex items-center gap-3 py-3">
+                <span className="relative inline-flex size-2">
+                  <span className="absolute inline-flex size-full animate-ping rounded-full bg-primary/60" />
+                  <span className="relative inline-flex size-2 rounded-full bg-primary" />
+                </span>
+                <PlayCircle className="size-4 text-primary" />
+                <span className="text-sm">
+                  Session in progress since{" "}
+                  {activeSession.startedAt.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })}
+                </span>
+                <span className="ml-auto text-xs text-primary">View →</span>
+              </CardContent>
+            </Card>
+          </Link>
+        )}
+
+        {highImpactToday.length > 0 && (
+          <Card className="border-dashed border-chart-5/40 bg-chart-5/5">
+            <CardContent className="flex flex-wrap items-center gap-2 py-3 text-xs">
+              <CalendarClock className="size-3.5 shrink-0 text-chart-5" />
+              <span className="text-muted-foreground">High-impact today:</span>
+              {highImpactToday.map((e, i) => (
+                <Badge key={`${e.event}-${i}`} variant="outline" className="border-chart-5/40 text-chart-5">
+                  {e.event}
+                </Badge>
+              ))}
+              <Link href="/global-intelligence" className="ml-auto text-primary hover:underline">
+                Full calendar →
+              </Link>
+            </CardContent>
+          </Card>
+        )}
+
+      <div className="grid gap-4 lg:grid-cols-2">
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
@@ -226,33 +286,37 @@ export default async function DashboardPage() {
               </Link>
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-3">
             {winRate.total === 0 ? (
               <p className="text-sm text-muted-foreground">No closed trades yet.</p>
             ) : (
-              <div className="flex items-center gap-6">
-                <div>
-                  <p className="text-xs text-muted-foreground">Net P&L</p>
-                  <p className={"text-lg font-semibold " + (netPnl >= 0 ? "text-success" : "text-destructive")}>
-                    <AnimatedNumber value={netPnl} prefix="$" decimals={2} signed />
-                  </p>
+              <>
+                <div className="flex items-center gap-6">
+                  <div>
+                    <p className="text-xs text-muted-foreground">Net P&L</p>
+                    <p className={"text-lg font-semibold " + (netPnl >= 0 ? "text-success" : "text-destructive")}>
+                      <AnimatedNumber value={netPnl} prefix="$" decimals={2} signed />
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Win rate</p>
+                    <p className="text-lg font-semibold">
+                      <AnimatedNumber value={winRate.pct} decimals={0} suffix="%" />
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Trades</p>
+                    <p className="text-lg font-semibold">
+                      <AnimatedNumber value={winRate.total} />
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Win rate</p>
-                  <p className="text-lg font-semibold">
-                    <AnimatedNumber value={winRate.pct} decimals={0} suffix="%" />
-                  </p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Trades</p>
-                  <p className="text-lg font-semibold">
-                    <AnimatedNumber value={winRate.total} />
-                  </p>
-                </div>
-              </div>
+                {equityCurve.length > 1 && <EquitySparkline data={equityCurve} />}
+              </>
             )}
           </CardContent>
         </Card>
+      </div>
       </div>
       </PageTransition>
     </>
