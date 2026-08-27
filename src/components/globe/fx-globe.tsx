@@ -1,7 +1,12 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Globe, { type GlobeInstance } from "globe.gl";
+import { Minus, Plus, RotateCcw } from "lucide-react";
+
+const INITIAL_VIEW = { lat: 30, lng: -10, altitude: 1.5 };
+const MIN_ALTITUDE = 0.5;
+const MAX_ALTITUDE = 3.2;
 
 const UP_COLOR = "#22c55e";
 const DOWN_COLOR = "#ef4444";
@@ -81,6 +86,8 @@ function withLabelAltitude(points: GlobeMarker[]): (GlobeMarker & { labelAltitud
 
 export function FxGlobe({ points }: { points: GlobeMarker[] }) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const globeRef = useRef<GlobeInstance | null>(null);
+  const [autoRotating, setAutoRotating] = useState(true);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -153,8 +160,19 @@ export function FxGlobe({ points }: { points: GlobeMarker[] }) {
 
     globe.controls().autoRotate = true;
     globe.controls().autoRotateSpeed = 0.35;
-    globe.controls().enableZoom = false;
-    globe.pointOfView({ lat: 30, lng: -10, altitude: 1.5 }, 0);
+    globe.controls().enableZoom = true;
+    globe.controls().minDistance = 100 + MIN_ALTITUDE * 100;
+    globe.controls().maxDistance = 100 + MAX_ALTITUDE * 100;
+    globe.pointOfView(INITIAL_VIEW, 0);
+
+    // Manual interaction (drag or scroll) stops the auto-rotate so the user
+    // stays where they left it, until they hit reset.
+    globe.controls().addEventListener("start", () => {
+      globe.controls().autoRotate = false;
+      setAutoRotating(false);
+    });
+
+    globeRef.current = globe;
 
     const resizeObserver = new ResizeObserver(() => {
       globe.width(container.clientWidth).height(container.clientHeight);
@@ -164,9 +182,56 @@ export function FxGlobe({ points }: { points: GlobeMarker[] }) {
     return () => {
       resizeObserver.disconnect();
       globe._destructor();
+      globeRef.current = null;
       container.replaceChildren();
     };
   }, [points]);
 
-  return <div ref={containerRef} className="h-[520px] w-full cursor-grab active:cursor-grabbing" />;
+  const zoomBy = (factor: number) => {
+    const globe = globeRef.current;
+    if (!globe) return;
+    const current = globe.pointOfView();
+    const altitude = Math.min(MAX_ALTITUDE, Math.max(MIN_ALTITUDE, current.altitude * factor));
+    globe.pointOfView({ altitude }, 400);
+  };
+
+  const resetView = () => {
+    const globe = globeRef.current;
+    if (!globe) return;
+    globe.pointOfView(INITIAL_VIEW, 600);
+    globe.controls().autoRotate = true;
+    setAutoRotating(true);
+  };
+
+  return (
+    <div className="relative">
+      <div ref={containerRef} className="h-[520px] w-full cursor-grab active:cursor-grabbing" />
+      <div className="absolute right-3 bottom-3 flex flex-col gap-1 rounded-lg border border-border/60 bg-card/80 p-1 backdrop-blur-xl">
+        <button
+          type="button"
+          onClick={() => zoomBy(0.8)}
+          aria-label="Zoom in"
+          className="flex size-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+        >
+          <Plus className="size-3.5" />
+        </button>
+        <button
+          type="button"
+          onClick={() => zoomBy(1.25)}
+          aria-label="Zoom out"
+          className="flex size-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+        >
+          <Minus className="size-3.5" />
+        </button>
+        <button
+          type="button"
+          onClick={resetView}
+          aria-label="Reset view"
+          className={`flex size-7 items-center justify-center rounded-md transition-colors hover:bg-secondary hover:text-foreground ${autoRotating ? "text-primary" : "text-muted-foreground"}`}
+        >
+          <RotateCcw className="size-3.5" />
+        </button>
+      </div>
+    </div>
+  );
 }
