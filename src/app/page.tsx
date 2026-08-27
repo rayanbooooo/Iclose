@@ -12,6 +12,10 @@ import { getPayoutReadiness } from "@/lib/payout";
 import { computeWinRate, computeEquityCurve } from "@/lib/analytics";
 import { formatCurrency, formatMoney } from "@/lib/format";
 
+// Reads live account/trade data — must render per-request, not be baked in
+// as a static page at build time.
+export const dynamic = "force-dynamic";
+
 const CONSISTENCY_BADGE: Record<string, "success" | "secondary" | "destructive" | "outline"> = {
   PASS: "success",
   AT_RISK: "secondary",

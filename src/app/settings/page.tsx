@@ -3,6 +3,10 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { getActiveAccountWithRule } from "@/lib/account";
 import { AccountForm } from "./account-form";
 
+// Reads live account data — must render per-request, not be baked in as a
+// static page at build time.
+export const dynamic = "force-dynamic";
+
 export default async function SettingsPage() {
   const account = await getActiveAccountWithRule();
 

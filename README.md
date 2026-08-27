@@ -7,14 +7,26 @@ funded-account payout-readiness tracker.
 ## Stack
 
 Next.js 16 (App Router, TypeScript) · Tailwind CSS v4 · hand-authored shadcn-style UI
-components · Prisma + SQLite (via the `@prisma/adapter-better-sqlite3` driver
-adapter) · Recharts · react-hook-form + Zod.
+components · Prisma + Postgres via [Neon](https://neon.tech) (the
+`@prisma/adapter-neon` driver adapter) · Recharts · react-hook-form + Zod.
+
+Local dev and the deployed app share one Neon database — this is a personal,
+single-user tool, so there's no separate dev/prod split.
 
 ## Getting started
 
+1. Get a Postgres connection string. Easiest path: add the **Neon** storage
+   integration to this project on Vercel (dashboard → Storage tab, or
+   `vercel install neon`), which provisions a free-tier database and can
+   inject `DATABASE_URL` into the Vercel project automatically. Pull it down
+   for local dev with `vercel env pull .env` (or copy it manually into a
+   local `.env` file — see `.env.example`).
+2. Install and set up:
+
 ```bash
 npm install
-npx prisma migrate deploy   # creates dev.db and applies the schema
+npx prisma generate
+npm run db:push   # creates the schema on the connected database (first time only)
 npm run dev
 ```
 
@@ -23,15 +35,27 @@ create your Topstep account and payout-rule thresholds there; the Dashboard,
 Journal, and Stats pages all need an account to exist before they show anything
 beyond a setup prompt.
 
-`dev.db` is gitignored (local-only, single-user) — if it's ever missing or you
-pull a fresh checkout, re-run `npx prisma migrate deploy` before `npm run dev`.
+Schema changes after the first `db:push`: for now, keep using `db:push` — there's
+no live database yet to generate a proper versioned Postgres migration against.
+Once this is running against a real database, switch to `prisma migrate dev`
+locally + `prisma migrate deploy` in `vercel-build` for real migration history
+(safer for data already in the table than `db push`, which can silently drop
+columns).
+
+## Deploying
+
+The Vercel project's build command is `npm run vercel-build` (`prisma generate
+&& next build` — schema push is a deliberate manual step, not part of the
+automated build, so a deploy never risks the database on its own). Once Neon
+storage is attached to the project and `DATABASE_URL` is set, pushes to the
+production branch deploy automatically.
 
 ## Other commands
 
 ```bash
 npm run lint        # ESLint
 npx tsc --noEmit     # type-check
-npx prisma studio    # browse the local database at localhost:5555
+npx prisma studio    # browse the database at localhost:5555
 ```
 
 ## Structure

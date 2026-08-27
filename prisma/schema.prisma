@@ -1,5 +1,7 @@
 // Prisma schema for the MNQ trading dashboard.
-// SQLite datasource (single-user, local-first) — see prisma.config.ts for the connection URL.
+// Postgres (Neon) datasource — see prisma.config.ts for the connection URL.
+// Single provider, shared by local dev and the deployed app (personal,
+// single-user tool — no need for separate dev/prod databases).
 
 generator client {
   provider = "prisma-client"
@@ -7,7 +9,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
 }
 
 model Candle {

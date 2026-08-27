@@ -17,6 +17,10 @@ import { formatCurrency, toDatetimeLocalValue } from "@/lib/format";
 import { TradeDialog } from "./trade-dialog";
 import { DeleteTradeButton } from "./delete-trade-button";
 
+// Reads live trade data — must render per-request, not be baked in as a
+// static page at build time.
+export const dynamic = "force-dynamic";
+
 export default async function JournalPage() {
   const account = await getActiveAccountWithRule();
 

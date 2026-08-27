@@ -9,6 +9,10 @@ import { formatCurrency } from "@/lib/format";
 import { EquityChart } from "./equity-chart";
 import { PnlByDayChart } from "./pnl-by-day-chart";
 
+// Reads live trade data — must render per-request, not be baked in as a
+// static page at build time.
+export const dynamic = "force-dynamic";
+
 export default async function StatsPage() {
   const account = await getActiveAccountWithRule();
 
