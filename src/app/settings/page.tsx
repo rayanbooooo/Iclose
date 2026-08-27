@@ -1,9 +1,11 @@
-import { Settings } from "lucide-react";
-
 import { PageHeader } from "@/components/page-header";
-import { EmptyState } from "@/components/empty-state";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { getActiveAccountWithRule } from "@/lib/account";
+import { AccountForm } from "./account-form";
 
-export default function SettingsPage() {
+export default async function SettingsPage() {
+  const account = await getActiveAccountWithRule();
+
   return (
     <>
       <PageHeader
@@ -11,12 +13,38 @@ export default function SettingsPage() {
         description="Account, payout rules, and strategy configuration"
       />
       <div className="p-6 md:p-8">
-        <EmptyState
-          icon={Settings}
-          title="Nothing configured yet"
-          description="Your Topstep account details, payout-rule thresholds, and strategy parameters will be editable here."
-          phase="Phase 2: account + payout-rule settings."
-        />
+        <Card className="max-w-2xl">
+          <CardHeader>
+            <CardTitle>{account ? "Account & payout rule" : "Set up your account"}</CardTitle>
+            <CardDescription>
+              {account
+                ? "Edit your Topstep account and payout-rule thresholds."
+                : "Create your Topstep account to start tracking payout readiness."}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <AccountForm
+              defaultValues={
+                account
+                  ? {
+                      name: account.name,
+                      accountType: account.accountType as "COMBINE" | "EXPRESS_FUNDED",
+                      startingBalance: account.startingBalance,
+                      profitTarget: account.profitTarget,
+                      trailingDrawdown: account.trailingDrawdown,
+                      drawdownMode: account.drawdownMode as
+                        | "EOD_TRAILING_LOCK_AT_START"
+                        | "INTRADAY_TRAILING",
+                      consistencyRulePct: account.payoutRule?.consistencyRulePct,
+                      minWinningDays: account.payoutRule?.minWinningDays,
+                      minWinningDayAmount: account.payoutRule?.minWinningDayAmount,
+                      minTradingDays: account.payoutRule?.minTradingDays,
+                    }
+                  : undefined
+              }
+            />
+          </CardContent>
+        </Card>
       </div>
     </>
   );

@@ -1,36 +1,52 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# MNQ Dashboard
 
-## Getting Started
+Personal trading dashboard for MNQ (Micro E-mini Nasdaq-100 futures) built around a
+15-minute swing-high/swing-low breakout-and-retest strategy, with a Topstep
+funded-account payout-readiness tracker.
 
-First, run the development server:
+## Stack
+
+Next.js 16 (App Router, TypeScript) · Tailwind CSS v4 · hand-authored shadcn-style UI
+components · Prisma + SQLite (via the `@prisma/adapter-better-sqlite3` driver
+adapter) · Recharts · react-hook-form + Zod.
+
+## Getting started
 
 ```bash
+npm install
+npx prisma migrate deploy   # creates dev.db and applies the schema
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000). First stop is **Settings** —
+create your Topstep account and payout-rule thresholds there; the Dashboard,
+Journal, and Stats pages all need an account to exist before they show anything
+beyond a setup prompt.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+`dev.db` is gitignored (local-only, single-user) — if it's ever missing or you
+pull a fresh checkout, re-run `npx prisma migrate deploy` before `npm run dev`.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Other commands
 
-## Learn More
+```bash
+npm run lint        # ESLint
+npx tsc --noEmit     # type-check
+npx prisma studio    # browse the local database at localhost:5555
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Structure
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- `src/lib/pnl.ts`, `src/lib/payout/`, `src/lib/analytics/` — pure, testable
+  business logic (P&L, drawdown/consistency-rule/payout calculations, win
+  rate/equity curve/streaks).
+- `src/lib/trading-day.ts` — buckets trades into exchange-local (ET) trading
+  days for daily P&L and payout-rule grouping.
+- `prisma/schema.prisma` — data model (candles/signals for the strategy engine,
+  accounts, payout rules, trades).
+- `data/market/` — periodically-synced TipRanks market data (economic
+  calendar, news, sentiment), committed as JSON since the dev sandbox this was
+  built in is ephemeral. See `src/lib/market-data/`.
+- `src/app/*/page.tsx` — Dashboard, Chart, Journal, News, Stats, Settings.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Chart + strategy engine (swing-hi/lo detection, breakout/retest signals) are not
+built yet — that's next.
