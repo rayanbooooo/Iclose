@@ -1,7 +1,6 @@
 import Link from "next/link";
 import {
   CandlestickChart,
-  ShieldCheck,
   NotebookText,
   BarChart3,
   TrendingUp,
@@ -14,9 +13,9 @@ import { PageHeader } from "@/components/page-header";
 import { PageTransition } from "@/components/page-transition";
 import { AnimatedNumber } from "@/components/animated-number";
 import { EquitySparkline } from "@/components/equity-sparkline";
+import { RadialGauge } from "@/components/ui/radial-gauge";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 import { db } from "@/lib/db";
 import { getActiveAccountWithRule } from "@/lib/account";
 import { getPayoutReadiness } from "@/lib/payout";
@@ -139,7 +138,61 @@ export default async function DashboardPage() {
           </Card>
         )}
 
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="relative overflow-hidden rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/10 via-card/60 to-accent/10 p-6 backdrop-blur-xl md:p-8">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,theme(colors.primary/15%),transparent_60%)]" />
+        <div className="relative flex flex-col gap-8 md:flex-row md:items-center md:justify-between">
+          <div>
+            <div className="flex items-center gap-2">
+              <p className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">
+                Account balance
+              </p>
+              <Badge variant={CONSISTENCY_BADGE[readiness.consistency.status]}>
+                {readiness.consistency.status.replace("_", " ")}
+              </Badge>
+            </div>
+            <p className="mt-1 bg-gradient-to-r from-primary via-foreground to-accent bg-clip-text text-5xl font-bold tabular-nums text-transparent md:text-6xl">
+              <AnimatedNumber value={readiness.balance} prefix="$" decimals={2} />
+            </p>
+            <p className="mt-2 text-sm text-muted-foreground">
+              {account.name} · {account.accountType.replace("_", " ")}
+            </p>
+            <div className="mt-4 flex flex-wrap gap-x-6 gap-y-1 text-xs text-muted-foreground">
+              <span>
+                Trading days: {readiness.tradingDays.count}/{readiness.tradingDays.required}
+              </span>
+              <span>
+                Winning days: {readiness.winningDays.count}/{readiness.winningDays.required}
+              </span>
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-6">
+            <RadialGauge
+              value={readiness.profitTarget.pct}
+              color="var(--color-primary)"
+              label={`${readiness.profitTarget.pct.toFixed(0)}%`}
+              sublabel="Profit target"
+            />
+            <RadialGauge
+              value={100 - drawdownUsedPct}
+              color={drawdownUsedPct > 70 ? "var(--color-destructive)" : "var(--color-success)"}
+              label={formatMoney(readiness.drawdown.remaining)}
+              sublabel="Drawdown cushion"
+            />
+            <RadialGauge
+              value={
+                readiness.tradingDays.required > 0
+                  ? Math.min(100, (readiness.tradingDays.count / readiness.tradingDays.required) * 100)
+                  : 100
+              }
+              color="var(--color-accent)"
+              label={`${readiness.tradingDays.count}/${readiness.tradingDays.required}`}
+              sublabel="Trading days"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-3">
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
@@ -172,62 +225,6 @@ export default async function DashboardPage() {
                 </span>
               </div>
             )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle className="flex items-center gap-2">
-                  <ShieldCheck className="size-4" /> Payout readiness
-                </CardTitle>
-                <CardDescription>{account.name}</CardDescription>
-              </div>
-              <Badge variant={CONSISTENCY_BADGE[readiness.consistency.status]}>
-                {readiness.consistency.status.replace("_", " ")}
-              </Badge>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-baseline justify-between">
-              <span className="text-xs text-muted-foreground">Balance</span>
-              <span className="text-sm font-semibold tabular-nums">
-                <AnimatedNumber value={readiness.balance} prefix="$" decimals={2} />
-              </span>
-            </div>
-            <div>
-              <div className="mb-1 flex items-baseline justify-between text-xs">
-                <span className="text-muted-foreground">Profit target</span>
-                <span className="tabular-nums">
-                  <AnimatedNumber value={readiness.profitTarget.profit} prefix="$" decimals={2} signed />
-                  {" / "}
-                  {formatMoney(readiness.profitTarget.target)}
-                </span>
-              </div>
-              <Progress value={readiness.profitTarget.pct} />
-            </div>
-            <div>
-              <div className="mb-1 flex items-baseline justify-between text-xs">
-                <span className="text-muted-foreground">Drawdown cushion remaining</span>
-                <span className="tabular-nums">
-                  <AnimatedNumber value={readiness.drawdown.remaining} prefix="$" decimals={2} />
-                </span>
-              </div>
-              <Progress
-                value={100 - drawdownUsedPct}
-                indicatorClassName={drawdownUsedPct > 70 ? "bg-destructive" : undefined}
-              />
-            </div>
-            <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
-              <span>
-                Trading days: {readiness.tradingDays.count}/{readiness.tradingDays.required}
-              </span>
-              <span>·</span>
-              <span>
-                Winning days: {readiness.winningDays.count}/{readiness.winningDays.required}
-              </span>
-            </div>
           </CardContent>
         </Card>
 

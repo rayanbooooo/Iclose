@@ -6,6 +6,7 @@ import { PageTransition } from "@/components/page-transition";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { RadialGauge } from "@/components/ui/radial-gauge";
 import { db } from "@/lib/db";
 import { getActiveAccountWithRule } from "@/lib/account";
 import { getPayoutReadiness } from "@/lib/payout";
@@ -90,23 +91,27 @@ export default async function RanksPage() {
       <PageHeader title="Ranks" description="Your real progress toward a Topstep payout — not a leaderboard, just your own milestones" />
       <PageTransition>
         <div className="space-y-4 p-6 md:p-8">
-          <Card className={cn(payoutEligible && "border-success/40 bg-success/5")}>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="flex items-center gap-2">
-                    <Award className="size-5 text-primary" />
-                    {TIER_NAMES[tierIndex]}
-                  </CardTitle>
-                  <CardDescription>{account.name} · {account.accountType.replace("_", " ")}</CardDescription>
-                </div>
-                <Badge variant={payoutEligible ? "success" : "secondary"}>
+          <Card className={cn("overflow-hidden", payoutEligible && "border-success/40 bg-success/5")}>
+            <CardContent className="flex flex-col items-center gap-6 pt-6 sm:flex-row sm:justify-between">
+              <div className="text-center sm:text-left">
+                <Badge variant={payoutEligible ? "success" : "secondary"} className="mb-2">
                   {metCount}/{milestones.length} milestones
                 </Badge>
+                <p className="flex items-center justify-center gap-2 text-xl font-semibold sm:justify-start">
+                  <Award className="size-5 text-primary" />
+                  {TIER_NAMES[tierIndex]}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  {account.name} · {account.accountType.replace("_", " ")}
+                </p>
               </div>
-            </CardHeader>
-            <CardContent>
-              <Progress value={overallPct} indicatorClassName={payoutEligible ? "bg-success" : undefined} />
+              <RadialGauge
+                value={overallPct}
+                size={112}
+                color={payoutEligible ? "var(--color-success)" : "var(--color-primary)"}
+                label={`${overallPct.toFixed(0)}%`}
+                sublabel="Complete"
+              />
             </CardContent>
           </Card>
 
