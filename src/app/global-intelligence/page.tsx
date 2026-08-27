@@ -1,20 +1,17 @@
-import { Globe as GlobeIcon } from "lucide-react";
+import { Globe as GlobeIcon, TrendingDown, TrendingUp } from "lucide-react";
 
 import { PageHeader } from "@/components/page-header";
 import { PageTransition } from "@/components/page-transition";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { FxGlobeLoader } from "@/components/globe/fx-globe-loader";
-import type { GlobePoint } from "@/components/globe/fx-globe";
+import type { GlobeMarker } from "@/components/globe/fx-globe";
 import { FX_CURRENCIES, getFxSnapshot } from "@/lib/market-data/fx";
 import { getEconomicCalendar, getMarketSnapshot } from "@/lib/market-data/read";
 import { formatRelativeTime, formatSignedPercent } from "@/lib/format";
+import { cn } from "@/lib/utils";
 
 const US_MARKER = { lat: 38.9, lng: -77.04 };
-
-function magnitudeRadius(pct: number): number {
-  return 0.35 + Math.min(Math.abs(pct) * 0.5, 1.1);
-}
 
 export const revalidate = 3600;
 
@@ -31,28 +28,37 @@ export default async function GlobalIntelligencePage() {
   );
   const highImpactToday = todaysEvents.filter((e) => e.impact === "High").length;
 
-  const points: GlobePoint[] = [];
+  const markers: GlobeMarker[] = [];
 
   for (const quote of fx?.quotes ?? []) {
     const meta = FX_CURRENCIES.find((c) => c.code === quote.currency);
     if (!meta) continue;
-    const color = quote.changePercentage > 0 ? "#22c55e" : quote.changePercentage < 0 ? "#ef4444" : "#a8a8bd";
-    points.push({
+    const rateStr = quote.rate.toFixed(quote.rate >= 10 ? 2 : 4);
+    markers.push({
       lat: meta.lat,
       lng: meta.lng,
-      color,
-      radius: magnitudeRadius(quote.changePercentage),
-      label: `${quote.pair} · ${quote.rate.toFixed(quote.rate >= 10 ? 2 : 4)} (${formatSignedPercent(quote.changePercentage)})`,
+      code: meta.code,
+      pair: quote.pair,
+      displayValue: rateStr,
+      tooltip: `${quote.pair} · ${rateStr} (${formatSignedPercent(quote.changePercentage)})`,
+      changePercentage: quote.changePercentage,
     });
   }
 
-  points.push({
+  markers.push({
     lat: US_MARKER.lat,
     lng: US_MARKER.lng,
-    color: highImpactToday > 0 ? "#a78bfa" : "#38bdf8",
-    radius: 0.5 + Math.min(todaysEvents.length * 0.15, 1),
-    label: `US · ${todaysEvents.length} econ event${todaysEvents.length === 1 ? "" : "s"} today (${highImpactToday} high-impact)`,
+    code: "US",
+    pair: "US",
+    displayValue: `${todaysEvents.length} events`,
+    tooltip: `US · ${todaysEvents.length} econ event${todaysEvents.length === 1 ? "" : "s"} today (${highImpactToday} high-impact)`,
+    changePercentage: null,
+    isHome: true,
   });
+
+  const biggestMover = [...(fx?.quotes ?? [])].sort(
+    (a, b) => Math.abs(b.changePercentage) - Math.abs(a.changePercentage),
+  )[0];
 
   return (
     <>
@@ -71,34 +77,74 @@ export default async function GlobalIntelligencePage() {
             </Card>
           )}
 
-          <Card className="overflow-hidden">
-            <CardHeader>
-              <div className="flex flex-wrap items-center justify-between gap-2">
+          <Card className="relative overflow-hidden">
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,theme(colors.primary/12%),transparent_65%)]" />
+            <CardContent className="relative px-0 pt-0 pb-0">
+              <div className="flex flex-wrap items-start justify-between gap-3 p-6 pb-0">
                 <div>
-                  <CardTitle className="flex items-center gap-2">
-                    <GlobeIcon className="size-4.5 text-primary" />
-                    Global FX situation
-                  </CardTitle>
-                  <CardDescription>
-                    Drag to rotate. Marker size = magnitude of today&rsquo;s move. Green = up, red = down.
-                  </CardDescription>
+                  <div className="mb-1 flex items-center gap-2">
+                    <span className="relative inline-flex size-1.5">
+                      <span className="absolute inline-flex size-full animate-ping rounded-full bg-primary/60" />
+                      <span className="relative inline-flex size-1.5 rounded-full bg-primary" />
+                    </span>
+                    <span className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">
+                      Global FX situation
+                    </span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Drag to rotate. Pulses scale with today&rsquo;s move — green up, red down.
+                  </p>
                 </div>
-                {fx && (
-                  <Badge variant="outline">
-                    ECB rates as of {fx.asOf}
-                  </Badge>
-                )}
+                <div className="flex items-center gap-2">
+                  {biggestMover && (
+                    <Badge
+                      variant={biggestMover.changePercentage >= 0 ? "success" : "destructive"}
+                      className="gap-1"
+                    >
+                      {biggestMover.changePercentage >= 0 ? (
+                        <TrendingUp className="size-3" />
+                      ) : (
+                        <TrendingDown className="size-3" />
+                      )}
+                      {biggestMover.pair} {formatSignedPercent(biggestMover.changePercentage)}
+                    </Badge>
+                  )}
+                  {fx && <Badge variant="outline">ECB rates as of {fx.asOf}</Badge>}
+                </div>
               </div>
-            </CardHeader>
-            <CardContent>
-              <FxGlobeLoader points={points} />
+              <FxGlobeLoader points={markers} />
             </CardContent>
           </Card>
+
+          <div className="grid gap-4 sm:grid-cols-3">
+            <Card>
+              <CardHeader className="pb-2">
+                <CardDescription>Markets tracked</CardDescription>
+                <CardTitle>{markers.length}</CardTitle>
+              </CardHeader>
+            </Card>
+            <Card>
+              <CardHeader className="pb-2">
+                <CardDescription>US events today</CardDescription>
+                <CardTitle>{todaysEvents.length}</CardTitle>
+              </CardHeader>
+            </Card>
+            <Card>
+              <CardHeader className="pb-2">
+                <CardDescription>High-impact today</CardDescription>
+                <CardTitle className={highImpactToday > 0 ? "text-destructive" : undefined}>
+                  {highImpactToday}
+                </CardTitle>
+              </CardHeader>
+            </Card>
+          </div>
 
           <div className="grid gap-4 lg:grid-cols-2">
             <Card>
               <CardHeader>
-                <CardTitle>FX pulse</CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  <GlobeIcon className="size-4" /> FX pulse
+                </CardTitle>
                 <CardDescription>Daily ECB reference rates vs. USD</CardDescription>
               </CardHeader>
               <CardContent>
@@ -108,19 +154,27 @@ export default async function GlobalIntelligencePage() {
                   <ul className="divide-y divide-border">
                     {fx.quotes.map((quote) => (
                       <li key={quote.pair} className="flex items-center justify-between py-2 text-sm">
-                        <span className="font-medium">{quote.pair}</span>
+                        <span className="flex items-center gap-2 font-medium">
+                          <span
+                            className={cn(
+                              "size-1.5 rounded-full",
+                              quote.changePercentage > 0 && "bg-success",
+                              quote.changePercentage < 0 && "bg-destructive",
+                              quote.changePercentage === 0 && "bg-muted-foreground",
+                            )}
+                          />
+                          {quote.pair}
+                        </span>
                         <span className="tabular-nums text-foreground/80">
                           {quote.rate.toFixed(quote.rate >= 10 ? 2 : 4)}
                         </span>
                         <span
-                          className={
-                            "tabular-nums text-xs " +
-                            (quote.changePercentage > 0
-                              ? "text-success"
-                              : quote.changePercentage < 0
-                                ? "text-destructive"
-                                : "text-muted-foreground")
-                          }
+                          className={cn(
+                            "tabular-nums text-xs",
+                            quote.changePercentage > 0 && "text-success",
+                            quote.changePercentage < 0 && "text-destructive",
+                            quote.changePercentage === 0 && "text-muted-foreground",
+                          )}
                         >
                           {formatSignedPercent(quote.changePercentage)}
                         </span>
@@ -147,14 +201,12 @@ export default async function GlobalIntelligencePage() {
                       <li key={`${event.event}-${i}`} className="flex items-center justify-between gap-2 py-2 text-sm">
                         <span className="flex items-center gap-2">
                           <span
-                            className={
-                              "size-1.5 shrink-0 rounded-full " +
-                              (event.impact === "High"
-                                ? "bg-destructive"
-                                : event.impact === "Medium"
-                                  ? "bg-chart-5"
-                                  : "bg-muted-foreground")
-                            }
+                            className={cn(
+                              "size-1.5 shrink-0 rounded-full",
+                              event.impact === "High" && "bg-destructive",
+                              event.impact === "Medium" && "bg-chart-5",
+                              event.impact === "Low" && "bg-muted-foreground",
+                            )}
                           />
                           {event.event}
                         </span>
