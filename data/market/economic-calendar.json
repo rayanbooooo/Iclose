@@ -1,0 +1,236 @@
+{
+  "syncedAt": "2026-08-27T01:29:05.783Z",
+  "source": "TipRanks economic calendar (US, High/Medium impact)",
+  "events": [
+    {
+      "actual": 0.25,
+      "country": "US",
+      "estimate": 0.2,
+      "event": "Core PCE Price Index MoM",
+      "impact": "High",
+      "prev": 0.1,
+      "time": "2026-08-26T12:30:00",
+      "unit": "%"
+    },
+    {
+      "actual": 8.2,
+      "country": "US",
+      "estimate": 0.7,
+      "event": "Corporate Profits QoQ",
+      "impact": "Medium",
+      "prev": 0.5,
+      "time": "2026-08-26T12:30:00",
+      "unit": "%"
+    },
+    {
+      "actual": 6.4,
+      "country": "US",
+      "estimate": 6.3,
+      "event": "GDP Price Index QoQ",
+      "impact": "Medium",
+      "prev": 3.6,
+      "time": "2026-08-26T12:30:00",
+      "unit": "%"
+    },
+    {
+      "actual": 1.5,
+      "country": "US",
+      "estimate": 1.5,
+      "event": "GDP Growth Rate QoQ",
+      "impact": "High",
+      "prev": 2.1,
+      "time": "2026-08-26T12:30:00",
+      "unit": "%"
+    },
+    {
+      "actual": 3.7,
+      "country": "US",
+      "estimate": null,
+      "event": "PCE Price Index YoY",
+      "impact": "Medium",
+      "prev": 3.7,
+      "time": "2026-08-26T12:30:00",
+      "unit": "%"
+    },
+    {
+      "actual": 0.2,
+      "country": "US",
+      "estimate": 0.1,
+      "event": "PCE Price Index MoM",
+      "impact": "Medium",
+      "prev": -0.1,
+      "time": "2026-08-26T12:30:00",
+      "unit": "%"
+    },
+    {
+      "actual": 0.5,
+      "country": "US",
+      "estimate": 0.2,
+      "event": "Personal Income MoM",
+      "impact": "High",
+      "prev": 0.2,
+      "time": "2026-08-26T12:30:00",
+      "unit": "%"
+    },
+    {
+      "actual": 0.2,
+      "country": "US",
+      "estimate": 0.2,
+      "event": "Personal Spending MoM",
+      "impact": "High",
+      "prev": 0.4,
+      "time": "2026-08-26T12:30:00",
+      "unit": "%"
+    },
+    {
+      "actual": 1.1,
+      "country": "US",
+      "estimate": 0.5,
+      "event": "Durable Goods Orders MoM",
+      "impact": "High",
+      "prev": 0.5,
+      "time": "2026-08-26T12:30:00",
+      "unit": "%"
+    },
+    {
+      "actual": 1.5,
+      "country": "US",
+      "estimate": 1.5,
+      "event": "Gross Domestic Product QoQ",
+      "impact": "High",
+      "prev": 2.1,
+      "time": "2026-08-26T12:30:00",
+      "unit": "%"
+    },
+    {
+      "actual": null,
+      "country": "US",
+      "estimate": null,
+      "event": "Fed Barkin Speech",
+      "impact": "Medium",
+      "prev": null,
+      "time": "2026-08-26T15:45:00",
+      "unit": null
+    },
+    {
+      "actual": null,
+      "country": "US",
+      "estimate": null,
+      "event": "Jackson Hole Symposium",
+      "impact": "Medium",
+      "prev": null,
+      "time": "2026-08-27T00:00:00",
+      "unit": null
+    },
+    {
+      "actual": null,
+      "country": "US",
+      "estimate": -99,
+      "event": "Goods Trade Balance",
+      "impact": "Medium",
+      "prev": -101.4,
+      "time": "2026-08-27T12:30:00",
+      "unit": "B"
+    },
+    {
+      "actual": null,
+      "country": "US",
+      "estimate": 208,
+      "event": "Initial Jobless Claims",
+      "impact": "Medium",
+      "prev": 206,
+      "time": "2026-08-27T12:30:00",
+      "unit": "K"
+    },
+    {
+      "actual": null,
+      "country": "US",
+      "estimate": 0.1,
+      "event": "Wholesale Inventories MoM",
+      "impact": "Medium",
+      "prev": 0.2,
+      "time": "2026-08-27T12:30:00",
+      "unit": "%"
+    },
+    {
+      "actual": null,
+      "country": "US",
+      "estimate": 57,
+      "event": "Chicago PMI",
+      "impact": "Medium",
+      "prev": 57.6,
+      "time": "2026-08-28T13:45:00",
+      "unit": null
+    },
+    {
+      "actual": 51,
+      "country": "US",
+      "estimate": 51,
+      "event": "Michigan Consumer Sentiment",
+      "impact": "High",
+      "prev": 55.2,
+      "time": "2026-08-28T14:00:00",
+      "unit": null
+    },
+    {
+      "actual": null,
+      "country": "US",
+      "estimate": 0.7,
+      "event": "Dallas Fed Manufacturing Index",
+      "impact": "Medium",
+      "prev": 1.3,
+      "time": "2026-08-31T14:30:00",
+      "unit": null
+    },
+    {
+      "actual": null,
+      "country": "US",
+      "estimate": 47,
+      "event": "Economic Optimism Index",
+      "impact": "Medium",
+      "prev": 45.1,
+      "time": "2026-09-01T14:00:00",
+      "unit": null
+    },
+    {
+      "actual": null,
+      "country": "US",
+      "estimate": 55,
+      "event": "ISM Manufacturing PMI",
+      "impact": "High",
+      "prev": 55.6,
+      "time": "2026-09-01T14:00:00",
+      "unit": null
+    },
+    {
+      "actual": null,
+      "country": "US",
+      "estimate": 7.32,
+      "event": "JOLTs Job Openings",
+      "impact": "High",
+      "prev": 7.359,
+      "time": "2026-09-01T14:00:00",
+      "unit": "M"
+    },
+    {
+      "actual": null,
+      "country": "US",
+      "estimate": 59,
+      "event": "ADP Employment Change",
+      "impact": "Medium",
+      "prev": 44,
+      "time": "2026-09-02T12:15:00",
+      "unit": "K"
+    },
+    {
+      "actual": null,
+      "country": "US",
+      "estimate": -0.1,
+      "event": "Factory Orders MoM",
+      "impact": "Medium",
+      "prev": -0.3,
+      "time": "2026-09-02T14:00:00",
+      "unit": "%"
+    }
+  ]
+}

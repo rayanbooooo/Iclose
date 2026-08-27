@@ -1,0 +1,45 @@
+{
+  "syncedAt": "2026-08-27T01:29:05.783Z",
+  "sentiment": {
+    "overallSentiment": "mixed",
+    "atmosphere": "The S&P 500 is trading near 7,674-7,678, essentially flat on the day but up over 18% year-over-year, while the Nasdaq Composite hovers around 26,100, down slightly intraday as chip stocks pull back ahead of Nvidia's earnings. The VIX sits around 15.5, indicating relatively low volatility despite mixed signals from sticky inflation data and cautious positioning ahead of a major earnings catalyst.",
+    "keyThemes": [
+      "Nvidia, CrowdStrike and Salesforce earnings in focus as AI capex bellwether",
+      "Sticky PCE inflation keeping Fed rate-cut expectations in check",
+      "Consumer confidence falling to a seven-month low",
+      "Chip and AI hyperscaler stocks volatile ahead of earnings",
+      "Oil prices easing amid reported Iran-Oman Strait of Hormuz developments"
+    ],
+    "tailwinds": [
+      "Cooling Treasury yields providing relief to equities",
+      "Resilient corporate earnings beats (e.g. Abercrombie & Fitch surge, semiconductor strength)",
+      "Core PCE inflation in line with expectations, reducing near-term Fed hike fears"
+    ],
+    "headwinds": [
+      "Elevated headline inflation and sticky core PCE readings",
+      "Weakening consumer confidence signaling softer demand ahead",
+      "Uncertainty around AI capex sustainability heading into Nvidia earnings"
+    ],
+    "generatedAt": "2026-08-26T21:50:09.400163Z"
+  },
+  "indices": [
+    {
+      "symbol": "^IXIC",
+      "name": "NASDAQ Composite",
+      "price": 26130.1967,
+      "change": -21.1023,
+      "changePercentage": -0.08069312,
+      "dayLow": 26021.629,
+      "dayHigh": 26189.809
+    },
+    {
+      "symbol": "^VIX",
+      "name": "CBOE Volatility Index",
+      "price": 15.21,
+      "change": -0.24,
+      "changePercentage": -1.5534,
+      "dayLow": 15.21,
+      "dayHigh": 15.74
+    }
+  ]
+}

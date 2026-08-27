@@ -1,0 +1,133 @@
+{
+  "syncedAt": "2026-08-27T01:29:05.783Z",
+  "source": "TipRanks latest news (QQQ,NVDA,AAPL,MSFT,AMZN,META,GOOGL,AVGO,TSLA)",
+  "articles": [
+    {
+      "id": 3757968,
+      "title": "Cathie Wood’s ARK Investment buys 57.7K shares of Broadcom today",
+      "excerpt": "20:10 EDT Cathie Wood’s ARK Investment buys 57.7K shares of Broadcom (AVGO) today.",
+      "author": "thefly",
+      "category": "the-fly",
+      "date": "2026-08-27 00:15:12",
+      "url": "https://www.tipranks.com/news/the-fly/cathie-woods-ark-investment-buys-57-7k-shares-of-broadcom-today-thefly-news",
+      "tickers": [
+        "AVGO"
+      ]
+    },
+    {
+      "id": 3757094,
+      "title": "Closing Bell Movers: Nvidia up 4% after result and outlook",
+      "excerpt": "The AI capex trade continued to work on Wednesday as gains in the Tech sector were paced by strong performance in computer hardware, communication equipment, and electronic components groups.",
+      "author": "gary-deduke",
+      "category": "the-fly",
+      "date": "2026-08-26 23:40:53",
+      "url": "https://www.tipranks.com/news/the-fly/closing-bell-movers-nvidia-up-4-after-result-and-outlook-thefly-news",
+      "tickers": [
+        "NVDA",
+        "ORCL",
+        "CRM",
+        "CRWD",
+        "PLTR"
+      ]
+    },
+    {
+      "id": 3756933,
+      "title": "Oracle Stock (ORCL) Gained 3% on Wednesday, Technical Indicators Point to Further Upside",
+      "excerpt": "Oracle ($ORCL) stock gained 2.85% on Wednesday, primarily driven by Citigroup ($C) initiating a 90-day positive catalyst watch and reaffirming a bullish $330 price target.",
+      "author": "radhika-saraogi",
+      "category": "news",
+      "date": "2026-08-26 22:45:02",
+      "url": "https://www.tipranks.com/news/oracle-stock-orcl-gained-3-on-wednesday-technical-indicators-point-to-further-upside",
+      "tickers": [
+        "MSFT",
+        "ORCL"
+      ]
+    },
+    {
+      "id": 3756818,
+      "title": "Nvidia Stock Is Climbing After Hours — What Investors Just Heard and What Wall Street Sees Next",
+      "excerpt": "Nvidia (NASDAQ:NVDA) investors apparently needed to hear management speak before deciding what they thought about Wednesday’s earnings. Shares initially slipped after the fiscal second-quarter report arrived, despite results and guidance.",
+      "author": "ben-yoffe",
+      "category": "news",
+      "date": "2026-08-26 22:00:17",
+      "url": "https://www.tipranks.com/news/nvidia-stock-is-climbing-after-hours-what-investors-just-heard-and-what-wall-street-sees-next",
+      "tickers": [
+        "NVDA"
+      ]
+    },
+    {
+      "id": 3756508,
+      "title": "Broadcom Stock (AVGO) Remains Wall Street’s Pick Despite Google’s Marvell Deal – Here’s Why",
+      "excerpt": "Tech giant Google ($GOOGL) is giving chipmaker Marvell ($MRVL) a bigger role in its AI-chip plans just as OpenAI is giving chip rival Broadcom ($AVGO) a new way to prove itself.",
+      "author": "vince-condarcuri",
+      "category": "news",
+      "date": "2026-08-26 21:55:00",
+      "url": "https://www.tipranks.com/news/broadcom-stock-avgo-remains-wall-streets-pick-despite-googles-marvell-deal-heres-why",
+      "tickers": [
+        "AVGO",
+        "GOOGL"
+      ]
+    },
+    {
+      "id": 3756817,
+      "title": "Nvidia expects supply to remain a bottleneck at least through the end of FY28",
+      "excerpt": "Sees FY27 operating expenses $9B. Sees FY27 tax rate 16%-18%. Says even though demand is much greater than 70%, supply allows the company to confidently deliver 70% revenue growth.",
+      "author": "thefly",
+      "category": "the-fly",
+      "date": "2026-08-26 21:45:15",
+      "url": "https://www.tipranks.com/news/the-fly/nvidia-expects-supply-to-remain-a-bottleneck-at-least-through-the-end-of-fy28-thefly-news",
+      "tickers": [
+        "NVDA"
+      ]
+    },
+    {
+      "id": 3756787,
+      "title": "Nvidia says expects CPU revenue up more than double in FY28",
+      "excerpt": "Says based on customer demand and improving supply outlook, the company’s preliminary expectation is for CPU revenue to more than double in FY28.",
+      "author": "thefly",
+      "category": "the-fly",
+      "date": "2026-08-26 21:20:47",
+      "url": "https://www.tipranks.com/news/the-fly/nvidia-says-expects-cpu-revenue-up-more-than-double-in-fy28-thefly-news",
+      "tickers": [
+        "NVDA"
+      ]
+    },
+    {
+      "id": 3756784,
+      "title": "Nvidia extending post-earnings gains, up 4% at $218.77, after FY28 outlook",
+      "excerpt": "17:18 EDT Nvidia (NVDA) extending post-earnings gains, up 4% at $218.77, after FY28 outlook.",
+      "author": "thefly",
+      "category": "the-fly",
+      "date": "2026-08-26 21:20:26",
+      "url": "https://www.tipranks.com/news/the-fly/nvidia-extending-post-earnings-gains-up-4-at-218-77-after-fy28-outlook-thefly-news",
+      "tickers": [
+        "NVDA"
+      ]
+    },
+    {
+      "id": 3756758,
+      "title": "Nvidia says expects to grow revenue by approximately 70% in FY28",
+      "excerpt": "Says this is a supply constrained outlook. Says surge in AI demand is driving a global infrastructure build out. Says with cloud industry backlog now greater than $2T.",
+      "author": "thefly",
+      "category": "the-fly",
+      "date": "2026-08-26 21:10:31",
+      "url": "https://www.tipranks.com/news/the-fly/nvidia-says-expects-to-grow-revenue-by-approximately-70-in-fy28-thefly-news",
+      "tickers": [
+        "NVDA"
+      ]
+    },
+    {
+      "id": 3756755,
+      "title": "Nvidia, AWS announce major expansion of strategic collaboration",
+      "excerpt": "Amazon Web Services, an Amazon.com (AMZN) company, and Nvidia (NVDA) announced a major expansion of their strategic collaboration to meet surging global demand for AI infrastructure.",
+      "author": "thefly",
+      "category": "the-fly",
+      "date": "2026-08-26 21:10:16",
+      "url": "https://www.tipranks.com/news/the-fly/nvidia-aws-announce-major-expansion-of-strategic-collaboration-thefly-news",
+      "tickers": [
+        "AMZN",
+        "NVDA"
+      ]
+    }
+  ]
+}

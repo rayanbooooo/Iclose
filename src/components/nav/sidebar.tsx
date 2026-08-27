@@ -8,6 +8,7 @@ import {
   NotebookText,
   BarChart3,
   Settings,
+  Newspaper,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -16,6 +17,7 @@ const NAV_ITEMS = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
   { href: "/chart", label: "Chart", icon: CandlestickChart },
   { href: "/journal", label: "Journal", icon: NotebookText },
+  { href: "/news", label: "News", icon: Newspaper },
   { href: "/stats", label: "Stats", icon: BarChart3 },
   { href: "/settings", label: "Settings", icon: Settings },
 ] as const;
