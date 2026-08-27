@@ -12,13 +12,12 @@ const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
-if (!process.env.DATABASE_URL) {
-  throw new Error(
-    "DATABASE_URL is not set. This app requires a Postgres (Neon) connection string — see README.md.",
-  );
-}
-
-const adapter = new PrismaNeon({ connectionString: process.env.DATABASE_URL });
+// Deliberately not validated eagerly at module scope: Next.js evaluates this
+// module while collecting page data at build time, before DATABASE_URL is
+// necessarily available (or needed yet). An empty connection string only
+// becomes a problem when a query actually runs, which is the right time to
+// surface it — the adapter/driver error at that point is clear enough.
+const adapter = new PrismaNeon({ connectionString: process.env.DATABASE_URL ?? "" });
 
 export const db = globalForPrisma.prisma ?? new PrismaClient({ adapter });
 
