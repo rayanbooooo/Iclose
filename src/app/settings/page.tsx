@@ -2,6 +2,8 @@ import { PageHeader } from "@/components/page-header";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { getActiveAccountWithRule } from "@/lib/account";
 import { db } from "@/lib/db";
+import { computeCurrentBalance } from "@/lib/payout";
+import { formatMoney } from "@/lib/format";
 import { PageTransition } from "@/components/page-transition";
 import { AccountForm } from "./account-form";
 import { ResetTradesButton } from "./reset-trades-button";
@@ -12,9 +14,9 @@ export const dynamic = "force-dynamic";
 
 export default async function SettingsPage() {
   const account = await getActiveAccountWithRule();
-  const tradeCount = account
-    ? await db.trade.count({ where: { accountId: account.id } })
-    : 0;
+  const trades = account ? await db.trade.findMany({ where: { accountId: account.id } }) : [];
+  const tradeCount = trades.length;
+  const currentBalance = account ? computeCurrentBalance(account, trades) : 0;
 
   return (
     <>
@@ -23,7 +25,32 @@ export default async function SettingsPage() {
         description="Account, payout rules, and strategy configuration"
       />
       <PageTransition>
-      <div className="p-6 md:p-8">
+      <div className="space-y-4 p-6 md:p-8">
+        {account && (
+          <div className="grid max-w-2xl grid-cols-3 gap-4">
+            <Card>
+              <CardHeader className="pb-2">
+                <CardDescription>Current balance</CardDescription>
+                <CardTitle className="text-base">{formatMoney(currentBalance)}</CardTitle>
+              </CardHeader>
+            </Card>
+            <Card>
+              <CardHeader className="pb-2">
+                <CardDescription>Trades logged</CardDescription>
+                <CardTitle className="text-base">{tradeCount}</CardTitle>
+              </CardHeader>
+            </Card>
+            <Card>
+              <CardHeader className="pb-2">
+                <CardDescription>Account created</CardDescription>
+                <CardTitle className="text-base">
+                  {account.createdAt.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}
+                </CardTitle>
+              </CardHeader>
+            </Card>
+          </div>
+        )}
+
         <Card className="max-w-2xl">
           <CardHeader>
             <CardTitle>{account ? "Account & payout rule" : "Set up your account"}</CardTitle>

@@ -10,12 +10,14 @@ import { db } from "@/lib/db";
 import { getActiveAccountWithRule } from "@/lib/account";
 import {
   computeDirectionBreakdown,
+  computeHourlyBreakdown,
   computeWeekdayBreakdown,
   detectOversizedLossDays,
   detectOvertradingDays,
   detectRevengeTrades,
 } from "@/lib/analytics/patterns";
 import { formatCurrency, formatEventTime } from "@/lib/format";
+import { HourlyChart } from "./hourly-chart";
 
 export const dynamic = "force-dynamic";
 
@@ -69,6 +71,7 @@ export default async function PatternIntelPage() {
 
   const weekdayStats = computeWeekdayBreakdown(trades).filter((d) => d.trades > 0);
   const directionStats = computeDirectionBreakdown(trades);
+  const hourlyStats = computeHourlyBreakdown(trades);
   const revengeFlags = detectRevengeTrades(trades);
   const oversizedDays = detectOversizedLossDays(trades, account.startingBalance);
   const overtradingDays = detectOvertradingDays(trades);
@@ -155,6 +158,18 @@ export default async function PatternIntelPage() {
               </CardContent>
             </Card>
           </div>
+
+          {hourlyStats.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle>By hour of day</CardTitle>
+                <CardDescription>Net P&amp;L by entry hour (ET) — where your edge actually shows up</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <HourlyChart data={hourlyStats} />
+              </CardContent>
+            </Card>
+          )}
 
           <Card>
             <CardHeader>

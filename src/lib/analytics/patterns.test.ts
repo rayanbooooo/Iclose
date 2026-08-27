@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  computeHourlyBreakdown,
   detectOversizedLossDays,
   detectOvertradingDays,
   detectRevengeTrades,
@@ -85,5 +86,23 @@ describe("detectOvertradingDays", () => {
     expect(flags).toHaveLength(1);
     expect(flags[0].day).toBe("2026-08-21");
     expect(flags[0].count).toBe(5);
+  });
+});
+
+describe("computeHourlyBreakdown", () => {
+  it("buckets closed trades by exchange-local (ET) hour of entry", () => {
+    const trades = [
+      // 14:00Z / 15:00Z in August is EDT (UTC-4) -> 10 ET / 11 ET
+      trade("2026-08-20T14:00:00Z", "2026-08-20T14:10:00Z", 100),
+      trade("2026-08-21T14:30:00Z", "2026-08-21T14:40:00Z", -50),
+      trade("2026-08-20T15:00:00Z", "2026-08-20T15:10:00Z", 75),
+    ];
+
+    const hours = computeHourlyBreakdown(trades);
+
+    expect(hours).toEqual([
+      { hour: 10, trades: 2, wins: 1, winRate: 50, netPnl: 50 },
+      { hour: 11, trades: 1, wins: 1, winRate: 100, netPnl: 75 },
+    ]);
   });
 });

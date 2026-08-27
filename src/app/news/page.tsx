@@ -1,5 +1,4 @@
 import { Fragment } from "react";
-import { ExternalLink } from "lucide-react";
 
 import { PageHeader } from "@/components/page-header";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -17,6 +16,7 @@ import { getEconomicCalendar, getMarketNews, getMarketSnapshot } from "@/lib/mar
 import { formatRelativeTime, formatSignedPercent } from "@/lib/format";
 import { PageTransition } from "@/components/page-transition";
 import { AnimatedNumber } from "@/components/animated-number";
+import { HeadlinesList } from "./headlines-list";
 import type { EconomicEventSchema } from "@/lib/market-data/schema";
 import type { z } from "zod";
 
@@ -230,32 +230,7 @@ export default async function NewsPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <ul className="space-y-4">
-              {news.articles.map((article) => (
-                <li key={article.id} className="border-b border-border pb-4 last:border-0 last:pb-0">
-                  <a
-                    href={article.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="group flex items-start justify-between gap-2 text-sm font-medium hover:underline"
-                  >
-                    {article.title}
-                    <ExternalLink className="mt-0.5 size-3.5 shrink-0 text-muted-foreground opacity-0 group-hover:opacity-100" />
-                  </a>
-                  <p className="mt-1 text-xs text-muted-foreground">{article.excerpt}</p>
-                  <div className="mt-2 flex flex-wrap items-center gap-1.5">
-                    {article.tickers.slice(0, 6).map((t) => (
-                      <Badge key={t} variant="outline">
-                        {t}
-                      </Badge>
-                    ))}
-                    <span className="ml-auto text-xs text-muted-foreground">
-                      {formatRelativeTime(article.date.replace(" ", "T") + "Z")}
-                    </span>
-                  </div>
-                </li>
-              ))}
-            </ul>
+            <HeadlinesList articles={news.articles} />
           </CardContent>
         </Card>
       </div>

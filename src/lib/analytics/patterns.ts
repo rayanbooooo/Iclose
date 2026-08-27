@@ -1,3 +1,5 @@
+import { formatInTimeZone } from "date-fns-tz";
+
 import { groupByTradingDay } from "@/lib/trading-day";
 
 export interface PatternTrade {
@@ -66,6 +68,31 @@ export function computeDirectionBreakdown(trades: PatternTrade[]): DirectionStat
     winRate: (b.wins / b.count) * 100,
     netPnl: b.netPnl,
   }));
+}
+
+export interface HourStat {
+  hour: number;
+  trades: number;
+  wins: number;
+  winRate: number;
+  netPnl: number;
+}
+
+/** Win rate/net P&L bucketed by exchange-local (ET) hour of entry — only hours with at least one closed trade. */
+export function computeHourlyBreakdown(trades: PatternTrade[]): HourStat[] {
+  const closed = closedSortedByExit(trades);
+  const buckets = new Map<number, { wins: number; count: number; netPnl: number }>();
+  for (const t of closed) {
+    const hour = Number(formatInTimeZone(t.entryTime, "America/New_York", "H"));
+    const bucket = buckets.get(hour) ?? { wins: 0, count: 0, netPnl: 0 };
+    bucket.count += 1;
+    bucket.netPnl += t.pnl;
+    if (t.pnl > 0) bucket.wins += 1;
+    buckets.set(hour, bucket);
+  }
+  return [...buckets.entries()]
+    .map(([hour, b]) => ({ hour, trades: b.count, wins: b.wins, winRate: (b.wins / b.count) * 100, netPnl: b.netPnl }))
+    .sort((a, b) => a.hour - b.hour);
 }
 
 export interface RevengeTradeFlag {

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Cpu, AlertTriangle, ShieldAlert, Flame, CheckCircle2 } from "lucide-react";
+import { Cpu, AlertTriangle, ShieldAlert, Flame, CheckCircle2, TrendingDown, Lightbulb } from "lucide-react";
 
 import { PageHeader } from "@/components/page-header";
 import { PageTransition } from "@/components/page-transition";
@@ -7,7 +7,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { db } from "@/lib/db";
 import { getActiveAccountWithRule } from "@/lib/account";
 import { getPayoutReadiness } from "@/lib/payout";
+import { computeStreaks } from "@/lib/analytics";
 import {
+  computeHourlyBreakdown,
   detectOversizedLossDays,
   detectOvertradingDays,
   detectRevengeTrades,
@@ -85,6 +87,30 @@ export default async function CoachPage() {
         severity: "warn",
       });
     }
+
+    const streaks = computeStreaks(trades);
+    if (streaks.currentType === "LOSS" && streaks.current >= 3) {
+      insights.push({
+        icon: <TrendingDown className="size-4 text-destructive" />,
+        title: `${streaks.current}-trade losing streak`,
+        detail: `Your current streak is ${streaks.current} losses in a row. Consider stepping away or cutting size until you break it — your longest losing streak on record is ${streaks.longestLoss}.`,
+        severity: "warn",
+      });
+    }
+
+    const hourlyStats = computeHourlyBreakdown(trades).filter((h) => h.trades >= 2);
+    if (hourlyStats.length >= 3) {
+      const best = hourlyStats.reduce((a, b) => (b.netPnl > a.netPnl ? b : a));
+      const worst = hourlyStats.reduce((a, b) => (b.netPnl < a.netPnl ? b : a));
+      if (best.hour !== worst.hour && worst.netPnl < 0) {
+        insights.push({
+          icon: <Lightbulb className="size-4 text-primary" />,
+          title: `Your edge is concentrated around ${best.hour}:00 ET`,
+          detail: `${best.hour}:00 ET nets ${formatCurrency(best.netPnl)} across ${best.trades} trades (${best.winRate.toFixed(0)}% win), while ${worst.hour}:00 ET nets ${formatCurrency(worst.netPnl)}. Worth considering whether you should be trading that hour at all.`,
+          severity: "info",
+        });
+      }
+    }
   }
 
   const readiness = getPayoutReadiness(account, account.payoutRule, trades);
@@ -130,7 +156,7 @@ export default async function CoachPage() {
             </Card>
           ) : (
             insights.map((insight, i) => (
-              <Card key={i}>
+              <Card key={i} className={insight.severity === "info" ? "border-primary/30 bg-primary/5" : undefined}>
                 <CardHeader className="pb-2">
                   <CardTitle className="flex items-center gap-2 text-base">
                     {insight.icon}
