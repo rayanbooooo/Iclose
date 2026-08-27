@@ -1,8 +1,7 @@
 import Link from "next/link";
-import { CandlestickChart, ShieldCheck, NotebookText, BarChart3 } from "lucide-react";
+import { CandlestickChart, ShieldCheck, NotebookText, BarChart3, TrendingUp, TrendingDown } from "lucide-react";
 
 import { PageHeader } from "@/components/page-header";
-import { EmptyState } from "@/components/empty-state";
 import { PageTransition } from "@/components/page-transition";
 import { AnimatedNumber } from "@/components/animated-number";
 import { Badge } from "@/components/ui/badge";
@@ -12,7 +11,9 @@ import { db } from "@/lib/db";
 import { getActiveAccountWithRule } from "@/lib/account";
 import { getPayoutReadiness } from "@/lib/payout";
 import { computeWinRate, computeEquityCurve } from "@/lib/analytics";
-import { formatCurrency, formatMoney } from "@/lib/format";
+import { formatCurrency, formatEventTime, formatMoney } from "@/lib/format";
+import { generateSampleCandles } from "@/lib/data-providers/sample-provider";
+import { DEFAULT_STRATEGY_CONFIG, runStrategy } from "@/lib/strategy-engine/engine";
 
 // Reads live account/trade data — must render per-request, not be baked in
 // as a static page at build time.
@@ -58,6 +59,9 @@ export default async function DashboardPage() {
   });
 
   const readiness = getPayoutReadiness(account, account.payoutRule, trades);
+  const sampleCandles = generateSampleCandles();
+  const { signals } = runStrategy(sampleCandles, DEFAULT_STRATEGY_CONFIG);
+  const latestSignal = signals[signals.length - 1];
   const winRate = computeWinRate(trades);
   const equityCurve = computeEquityCurve(trades, account.startingBalance);
   const netPnl = equityCurve.length > 0 ? equityCurve[equityCurve.length - 1].balance - account.startingBalance : 0;
@@ -76,12 +80,40 @@ export default async function DashboardPage() {
       />
       <PageTransition>
       <div className="grid gap-4 p-6 md:p-8 lg:grid-cols-2">
-        <EmptyState
-          icon={<CandlestickChart className="size-4.5" />}
-          title="Chart"
-          description="Live MNQ 15m candles with swing-hi/lo lines and signal markers."
-          phase="Next up: strategy engine + live chart."
-        />
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2">
+                <CandlestickChart className="size-4" /> Strategy signal
+              </CardTitle>
+              <Link href="/chart" className="text-xs text-primary hover:underline">
+                Full chart
+              </Link>
+            </div>
+            <CardDescription>MNQ · 15m · latest breakout/retest signal (sample data)</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {!latestSignal ? (
+              <p className="text-sm text-muted-foreground">No signals fired against this sample run.</p>
+            ) : (
+              <div className="flex items-center gap-3">
+                <Badge variant={latestSignal.direction === "LONG" ? "success" : "destructive"} className="gap-1">
+                  {latestSignal.direction === "LONG" ? (
+                    <TrendingUp className="size-3" />
+                  ) : (
+                    <TrendingDown className="size-3" />
+                  )}
+                  {latestSignal.direction}
+                </Badge>
+                <span className="text-sm font-medium tabular-nums">{formatMoney(latestSignal.price)}</span>
+                <span className="text-xs text-muted-foreground">
+                  {latestSignal.kind === "BREAKOUT" ? "Breakout" : "Retest"} ·{" "}
+                  {formatEventTime(new Date(latestSignal.time * 1000).toISOString())}
+                </span>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
         <Card>
           <CardHeader>

@@ -38,25 +38,29 @@ function toTradeData(values: TradeFormValues) {
   };
 }
 
-export async function createTrade(accountId: string, values: TradeFormValues) {
-  const data = toTradeData(values);
-  await db.trade.create({ data: { ...data, accountId, symbol: "MNQ" } });
+function revalidateTradeDependentPaths() {
   revalidatePath("/journal");
   revalidatePath("/");
   revalidatePath("/stats");
+  revalidatePath("/pattern-intel");
+  revalidatePath("/coach");
+  revalidatePath("/ranks");
+  revalidatePath("/tax-report");
+}
+
+export async function createTrade(accountId: string, values: TradeFormValues) {
+  const data = toTradeData(values);
+  await db.trade.create({ data: { ...data, accountId, symbol: "MNQ" } });
+  revalidateTradeDependentPaths();
 }
 
 export async function updateTrade(id: string, values: TradeFormValues) {
   const data = toTradeData(values);
   await db.trade.update({ where: { id }, data });
-  revalidatePath("/journal");
-  revalidatePath("/");
-  revalidatePath("/stats");
+  revalidateTradeDependentPaths();
 }
 
 export async function deleteTrade(id: string) {
   await db.trade.delete({ where: { id } });
-  revalidatePath("/journal");
-  revalidatePath("/");
-  revalidatePath("/stats");
+  revalidateTradeDependentPaths();
 }

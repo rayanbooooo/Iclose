@@ -159,3 +159,19 @@ body {
     animation: none;
   }
 }
+
+/* Ticker: continuous left-scrolling marquee of two duplicated item lists. */
+@keyframes ticker-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+.animate-ticker {
+  animation: ticker-scroll 45s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-ticker {
+    animation: none;
+  }
+}

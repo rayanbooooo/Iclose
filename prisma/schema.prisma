@@ -97,6 +97,8 @@ model Account {
 
   trades     Trade[]
   payoutRule PayoutRule?
+  notes      Note[]
+  sessions   TradingSession[]
 }
 
 model PayoutRule {
@@ -136,4 +138,28 @@ model Trade {
   updatedAt          DateTime        @updatedAt
 
   @@index([accountId, entryTime])
+}
+
+model Note {
+  id         String   @id @default(cuid())
+  accountId  String
+  account    Account  @relation(fields: [accountId], references: [id])
+  title      String
+  body       String
+  tradingDay String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([accountId, createdAt])
+}
+
+model TradingSession {
+  id        String    @id @default(cuid())
+  accountId String
+  account   Account   @relation(fields: [accountId], references: [id])
+  startedAt DateTime  @default(now())
+  endedAt   DateTime?
+  notes     String?
+
+  @@index([accountId, startedAt])
 }
