@@ -1,0 +1,137 @@
+// Prisma schema for the MNQ trading dashboard.
+// SQLite datasource (single-user, local-first) — see prisma.config.ts for the connection URL.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Candle {
+  id        String   @id @default(cuid())
+  symbol    String
+  timeframe String
+  timestamp DateTime
+  open      Float
+  high      Float
+  low       Float
+  close     Float
+  volume    Float?
+  source    String
+  createdAt DateTime @default(now())
+
+  @@unique([symbol, timeframe, timestamp])
+  @@index([symbol, timeframe, timestamp])
+}
+
+model StrategyConfig {
+  id               String   @id @default(cuid())
+  name             String
+  lookbackPeriod   Int      @default(5)
+  retestTolerance  Float    @default(10)
+  confirmationBars Int      @default(1)
+  expireAfterBars  Int      @default(20)
+  mirroredEnabled  Boolean  @default(false)
+  params           String?
+  isActive         Boolean  @default(true)
+  createdAt        DateTime @default(now())
+
+  swingPoints SwingPoint[]
+  signals     StrategySignal[]
+}
+
+model SwingPoint {
+  id            String         @id @default(cuid())
+  symbol        String
+  timeframe     String
+  timestamp     DateTime
+  type          String
+  price         Float
+  configId      String
+  config        StrategyConfig @relation(fields: [configId], references: [id])
+  invalidatedAt DateTime?
+  createdAt     DateTime       @default(now())
+
+  signals StrategySignal[]
+
+  @@index([symbol, timeframe, timestamp])
+}
+
+model StrategySignal {
+  id              String         @id @default(cuid())
+  symbol          String
+  timeframe       String
+  candleTimestamp DateTime
+  swingPointId    String
+  swingPoint      SwingPoint     @relation(fields: [swingPointId], references: [id])
+  kind            String
+  direction       String
+  status          String
+  price           Float
+  configId        String
+  config          StrategyConfig @relation(fields: [configId], references: [id])
+  createdAt       DateTime       @default(now())
+
+  trades Trade[]
+
+  @@index([symbol, timeframe, candleTimestamp])
+}
+
+model Account {
+  id               String   @id @default(cuid())
+  name             String
+  accountType      String
+  startingBalance  Float
+  currentBalance   Float
+  highWaterMark    Float
+  profitTarget     Float
+  trailingDrawdown Float
+  drawdownMode     String
+  isActive         Boolean  @default(true)
+  createdAt        DateTime @default(now())
+
+  trades     Trade[]
+  payoutRule PayoutRule?
+}
+
+model PayoutRule {
+  id                  String   @id @default(cuid())
+  accountId           String   @unique
+  account             Account  @relation(fields: [accountId], references: [id])
+  consistencyRulePct  Float    @default(50)
+  minWinningDays      Int      @default(5)
+  minWinningDayAmount Float    @default(150)
+  minTradingDays      Int      @default(0)
+  notes               String?
+  updatedAt           DateTime @updatedAt
+}
+
+model Trade {
+  id                 String          @id @default(cuid())
+  accountId          String
+  account            Account         @relation(fields: [accountId], references: [id])
+  symbol             String          @default("MNQ")
+  direction          String
+  contracts          Int
+  entryPrice         Float
+  exitPrice          Float?
+  entryTime          DateTime
+  exitTime           DateTime?
+  stopLoss           Float?
+  takeProfit         Float?
+  fees               Float           @default(0)
+  contractMultiplier Float           @default(2)
+  pnl                Float?
+  status             String          @default("OPEN")
+  notes              String?
+  tags               String?
+  signalId           String?
+  signal             StrategySignal? @relation(fields: [signalId], references: [id])
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+
+  @@index([accountId, entryTime])
+}
