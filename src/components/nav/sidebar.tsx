@@ -111,7 +111,7 @@ export function Sidebar() {
   return (
     <aside className="hidden md:flex w-60 shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground">
       <div className="px-5 py-5">
-        <span className="flex items-center gap-2 text-sm font-semibold tracking-wide text-sidebar-foreground">
+        <span className="font-display flex items-center gap-2 text-sm font-semibold tracking-wide text-sidebar-foreground">
           <span className="relative inline-flex size-1.5 shrink-0">
             <span className="absolute inline-flex size-full animate-ping rounded-full bg-sidebar-primary/60" />
             <span className="relative inline-flex size-1.5 rounded-full bg-sidebar-primary" />

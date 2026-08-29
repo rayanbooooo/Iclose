@@ -100,12 +100,20 @@
   --color-sidebar-ring: var(--sidebar-ring);
 
   --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-space-grotesk);
+  --font-mono: var(--font-jetbrains-mono);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
+}
+
+/* tabular-nums already marks "this is a data number" throughout the app
+   (prices, P&L, balances) — give every one of them the instrument-readout
+   mono face without having to touch each call site individually. */
+.tabular-nums {
+  font-family: var(--font-mono);
 }
 
 * {
